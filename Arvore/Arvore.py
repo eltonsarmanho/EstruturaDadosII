@@ -32,26 +32,70 @@ class NodoArvore:
             else:
                 self.esquerda.insere(nodo)
 
-    def InOrdem(self):
+    def busca(self, chave):
+        """Procura por uma chave em uma árvore binária de pesquisa."""
+        # Trata o caso em que a chave procurada não está presente.
+        try:
+            if self.chave is None:
+                return None
+
+                # A chave procurada está na raiz da árvore.
+            if self.chave == chave:
+                return chave
+
+                # A chave procurada é maior que a da raiz.
+            if self.chave < chave:
+                return self.direita.busca(chave)
+
+                # A chave procurada é menor que a da raiz.
+            return self.esquerda.busca(chave)
+        except:
+            return None;
+
+
+    def inOrdem(self):
         if not self.chave:
             return
 
         if not(self.esquerda is None):
             # Visita filho da esquerda.
-            self.esquerda.InOrdem()
+            self.esquerda.inOrdem()
         # Visita nodo corrente.
         print(self.chave)
 
         if not(self.direita is None):
             # Visita filho da direita.
-            self.direita.InOrdem()
+            self.direita.inOrdem()
+
+    def preOrdem(self):
+        if not self.chave:
+            return
+
+        # Visita nodo corrente.
+        print(self.chave)
+
+        if not(self.esquerda is None):
+            # Visita filho da esquerda.
+            self.esquerda.preOrdem()
+
+        if not(self.direita is None):
+            # Visita filho da direita.
+            self.direita.preOrdem()
 
 if __name__ == '__main__':
     # Cria uma árvore binária de pesquisa.
     raiz = NodoArvore(40)
 
-    for chave in [20, 60, 50, 70, 10, 30]:
+    for chave in [20, 60, 50, 62, 70, 10, 30]:
         nodo = NodoArvore(chave,None,None)
         raiz.insere(nodo)
     #print("Árvore: ", raiz)
-    raiz.InOrdem()
+    #raiz.inOrdem()
+    #raiz.preOrdem()
+
+    chave = 61
+    resultado = raiz.busca(chave)
+    if resultado:
+        print("Busca pela chave {}: Sucesso!".format(chave))
+    else:
+        print("Busca pela chave {}: Falha!".format(chave))
