@@ -3,7 +3,7 @@
 # Esses apontadores representam as ligações (arestas) de uma árvore#
 class NodoArvore:
 
-    def __init__(self, chave, esquerda=None, direita=None):
+    def __init__(self, chave=None, esquerda=None, direita=None):
         self.chave = chave
         self.esquerda = esquerda
         self.direita = direita
@@ -52,7 +52,6 @@ class NodoArvore:
         except:
             return None;
 
-
     def inOrdem(self):
         if not self.chave:
             return
@@ -82,20 +81,74 @@ class NodoArvore:
             # Visita filho da direita.
             self.direita.preOrdem()
 
+    def posOrdem(self):
+        if not self.chave:
+            return
+        if not(self.esquerda is None):
+            # Visita filho da esquerda.
+            self.esquerda.preOrdem()
+
+        if not(self.direita is None):
+            # Visita filho da direita.
+            self.direita.preOrdem()
+
+        # Visita nodo corrente.
+        print(self.chave)
+
+    def getNumero(self, tokenList):
+        if self.getToken(tokenList, '('):
+            x = self.getSoma(tokenList)  # get subexpression
+            self.getToken(tokenList, ')')  # eat the closing parenthesis
+            return x
+        else:
+            x = tokenList[0]
+            if type(x) != type(0): return None
+            tokenList[0:1] = []  # remove the token
+            return NodoArvore(x, None, None)  # return a leaf with the numbe
+
+    def getProduto(self, tokenList):
+        a = self.getNumero(tokenList)
+        if self.getToken(tokenList, '*'):
+            b = self.getProduto(tokenList)
+            return NodoArvore('*', a, b)
+        else:
+            return a
+
+    def getSoma(self, tokenList):
+        a = self.getProduto(tokenList)
+        if self.getToken(tokenList, '+'):
+            b = self.getSoma(tokenList)
+            return NodoArvore('+', a, b)
+        else:
+            return a
+
+
+    def getToken(self,tokenList, expected):
+        if tokenList[0] == expected:
+            tokenList[0:1] = []  # remove the token
+            return 1
+        else:
+            return 0
 if __name__ == '__main__':
     # Cria uma árvore binária de pesquisa.
-    raiz = NodoArvore(40)
+    raiz = NodoArvore("+")
 
-    for chave in [20, 60, 50, 62, 70, 10, 30]:
+    for chave in ["1", "*", "9", "2"]:
         nodo = NodoArvore(chave,None,None)
         raiz.insere(nodo)
     #print("Árvore: ", raiz)
     #raiz.inOrdem()
     #raiz.preOrdem()
 
-    chave = 61
-    resultado = raiz.busca(chave)
-    if resultado:
-        print("Busca pela chave {}: Sucesso!".format(chave))
-    else:
-        print("Busca pela chave {}: Falha!".format(chave))
+    #chave = 61
+    #resultado = raiz.busca(chave)
+    #if resultado:
+    #    print("Busca pela chave {}: Sucesso!".format(chave))
+    #else:
+    #    print("Busca pela chave {}: Falha!".format(chave))
+
+    #9 * (11 + 5) * 7
+    tokenList = [9, '*', '(', 11, '+', 5, ')', '*', 7, 'end']
+    tree = NodoArvore()
+    nodo = tree.getSoma(tokenList)
+    print(nodo.inOrdem())
