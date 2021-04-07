@@ -17,14 +17,11 @@ class NodoArvore:
         """Insere um nodo em uma árvore binária de pesquisa."""
 
         # Nodo deve ser inserido na subárvore direita.
-        #print(self.chave , nodo.chave)
-
         if self.chave < nodo.chave:
             if self.direita is None:
                 self.direita = nodo
             else:
                 self.direita.insere(nodo)
-
         # Nodo deve ser inserido na subárvore esquerda.
         else:
             if self.esquerda is None:
@@ -122,23 +119,25 @@ class NodoArvore:
         else:
             return a
 
-
     def getToken(self,tokenList, expected):
         if tokenList[0] == expected:
             tokenList[0:1] = []  # remove the token
             return 1
         else:
             return 0
+
 if __name__ == '__main__':
     # Cria uma árvore binária de pesquisa.
-    raiz = NodoArvore("+")
+    raiz = NodoArvore(40)
 
-    for chave in ["1", "*", "9", "2"]:
+    for chave in [20, 80, 35, 80,70]:
         nodo = NodoArvore(chave,None,None)
         raiz.insere(nodo)
-    #print("Árvore: ", raiz)
+    print("Árvore: ", raiz)
+    raiz.preOrdem()
+
     #raiz.inOrdem()
-    #raiz.preOrdem()
+    #
 
     #chave = 61
     #resultado = raiz.busca(chave)
@@ -148,7 +147,7 @@ if __name__ == '__main__':
     #    print("Busca pela chave {}: Falha!".format(chave))
 
     #9 * (11 + 5) * 7
-    tokenList = [9, '*', '(', 11, '+', 5, ')', '*', 7, 'end']
-    tree = NodoArvore()
-    nodo = tree.getSoma(tokenList)
-    print(nodo.inOrdem())
+    #tokenList = [9, '*', '(', 11, '+', 5, ')', '*', 7, 'end']
+    #tree = NodoArvore()
+    #nodo = tree.getSoma(tokenList)
+    #print(nodo.inOrdem())
