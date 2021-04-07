@@ -11,3 +11,8 @@ class NodoArvore:
         return '%s <- %s -> %s' % (self.esquerda and self.esquerda.chave,
                                     self.chave,
                                     self.direita and self.direita.chave)
+if __name__ == '__main__':
+    raiz = NodoArvore(3)
+    raiz.esquerda = NodoArvore(5)
+    raiz.direita = NodoArvore(1)
+    print("Árvore: ", raiz)
