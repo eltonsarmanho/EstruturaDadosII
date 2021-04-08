@@ -94,14 +94,14 @@ class NodoArvore:
 
     def getNumero(self, tokenList):
         if self.getToken(tokenList, '('):
-            x = self.getSoma(tokenList)  # get subexpression
-            self.getToken(tokenList, ')')  # eat the closing parenthesis
+            x = self.getSoma(tokenList)  # pega subexpressao subexpression
+            self.getToken(tokenList, ')')  # fecha parenteses
             return x
         else:
             x = tokenList[0]
             if type(x) != type(0): return None
-            tokenList[0:1] = []  # remove the token
-            return NodoArvore(x, None, None)  # return a leaf with the numbe
+            tokenList[0:1] = []  # remove o token
+            return NodoArvore(x, None, None)  # retorna uma folha com numero
 
     def getProduto(self, tokenList):
         a = self.getNumero(tokenList)
@@ -121,7 +121,7 @@ class NodoArvore:
 
     def getToken(self,tokenList, expected):
         if tokenList[0] == expected:
-            tokenList[0:1] = []  # remove the token
+            tokenList[0:1] = []  # remove o token
             return 1
         else:
             return 0
