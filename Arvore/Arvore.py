@@ -67,7 +67,7 @@ class NodoArvore:
         if not self.chave:
             return
 
-        # Visita nodo corrente.
+        # Visita nodo.
         print(self.chave)
 
         if not(self.esquerda is None):
@@ -130,10 +130,11 @@ if __name__ == '__main__':
     # Cria uma árvore binária de pesquisa.
     raiz = NodoArvore(40)
 
-    for chave in [20, 80, 35, 80,70]:
+    for chave in [20, 80, 35, 90,70]:
         nodo = NodoArvore(chave,None,None)
         raiz.insere(nodo)
-    print("Árvore: ", raiz)
+    #print("Árvore: ", raiz)
+
     raiz.preOrdem()
 
     #raiz.inOrdem()
@@ -147,7 +148,7 @@ if __name__ == '__main__':
     #    print("Busca pela chave {}: Falha!".format(chave))
 
     #9 * (11 + 5) * 7
-    #tokenList = [9, '*', '(', 11, '+', 5, ')', '*', 7, 'end']
-    #tree = NodoArvore()
-    #nodo = tree.getSoma(tokenList)
-    #print(nodo.inOrdem())
+    tokenList = [9, '*', '(', 11, '+', 5, ')', '*', 7, 'end']
+    tree = NodoArvore()
+    expressao = tree.getSoma(tokenList)
+    print(expressao.inOrdem())
