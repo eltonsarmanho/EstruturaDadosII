@@ -147,8 +147,8 @@ if __name__ == '__main__':
     #else:
     #    print("Busca pela chave {}: Falha!".format(chave))
 
-    #9 * (11 + 5) * 7
-    tokenList = [9, '*', '(', 11, '+', 5, ')', '*', 7, 'end']
+    #(9 * 11) + (5 * 7)
+    tokenList = ['(',9, '*', 11,')', '+','(', 5,  '*', 7,')', 'end']
     tree = NodoArvore()
     expressao = tree.getSoma(tokenList)
     print(expressao.inOrdem())
