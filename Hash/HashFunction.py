@@ -40,6 +40,7 @@ if __name__ == '__main__':
     hashing.insere(HashTable, 25, '25')
     hashing.display_hash(HashTable)
 
+
     print("Metodo Multiplicacao")
     HashTable = np.array([None] * 1000)
     hashing = Hashing(funcao="Multiplicacao")

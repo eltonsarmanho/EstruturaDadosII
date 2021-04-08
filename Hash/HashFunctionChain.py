@@ -35,7 +35,6 @@ class HashingChain:
                 print(j, end=" ")
             print()
 
-
 if __name__ == '__main__':
     # Criar uma Hashtable como lista.
     print("Metodo Divisao")

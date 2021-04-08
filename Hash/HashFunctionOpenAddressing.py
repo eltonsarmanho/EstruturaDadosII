@@ -37,6 +37,7 @@ class HashingOpenAddressing:
     def display_hash(self,hashTable):
         for i in range(len(hashTable)):
             print(str(i) +" --> "+str(hashTable[i]),end="\n")
+
 if __name__ == '__main__':
     # Criar uma Hashtable como lista.
     print("Metodo Tentativa Linear")
