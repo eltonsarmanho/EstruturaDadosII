@@ -3,6 +3,7 @@ import numpy as np
 
 
 class HashingChain:
+
     def __init__(self,funcao):
         self.funcao = funcao
         pass;
@@ -23,8 +24,7 @@ class HashingChain:
             endereco = self.hashingDivisao(valor_chave,hashtable)
         elif (self.funcao == "Multiplicacao"):
             endereco = self.hashingMultiplicacao(valor_chave,hashtable)
-
-        hashtable[endereco].append(valor)
+        hashtable[endereco].insert(0,valor)
 
     # Mostrar a tabela hash
     def display_hash(self,hashTable):
@@ -37,14 +37,13 @@ class HashingChain:
 
 if __name__ == '__main__':
     # Criar uma Hashtable como lista.
-    print("Metodo Divisao")
-    HashTable = [[] for x in range(8)]
+    print("Metodo Encadeamento")
+    HashTable = [[] for x in range(9)]
+
     hashing = HashingChain(funcao="Divisao")
     # Add os elementos na Tabela
-    hashing.insere(HashTable, 16, '16', )
-    hashing.insere(HashTable, 23, '23')
-    hashing.insere(HashTable, 41, '41')
-    hashing.insere(HashTable, 25, '25')
+    for valor in [5, 28, 19, 15, 20, 33, 12, 17, 10]:
+        hashing.insere(HashTable, valor, str(valor))
     hashing.display_hash(HashTable)
 
     # print("Metodo Multiplicacao")
