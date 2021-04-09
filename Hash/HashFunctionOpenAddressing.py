@@ -44,8 +44,9 @@ if __name__ == '__main__':
     # Add os elementos na Tabela
     for valor in [20, 30, 2, 13, 25, 24, 10, 9]:
         hashing.insere(HashTable, valor, str(valor))
-    #hashing.display_hash(HashTable)
+    hashing.display_hash(HashTable)
 
+    print("Metodo Tentativa Quadratica")
     HashTable = np.array([[None] * 11, ['L'] * 11])
     hashing = HashingOpenAddressing(metodo="quadratica")
     # Add os elementos na Tabela
