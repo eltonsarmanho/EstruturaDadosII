@@ -1,21 +1,14 @@
 
 from collections import defaultdict
 
-class Graph:
+from Grafo.Grafo import Grafo
+
+
+class BFS:
 
     # Constructor
     def __init__(self,vertices_):
-        self.vertices = {}
-        for i, v in enumerate(vertices_):
-            self.vertices[v] = i
-        #print(self.vertices)
-        # default dictionary to store graph
-        self.graph = defaultdict(list)
-
-    # function to add an edge to graph
-    def addEdge(self, u, v):
-        self.graph[self.vertices[u]].append(self.vertices[v])
-    # Function to print a BFS of graph
+        pass;
     def BFS(self, s):
         # Marcar todos os vertices nao visitados
         cor = ['BRANCO'] * (len(self.graph) )
@@ -79,7 +72,7 @@ class Graph:
 # g.addEdge("y", "u")
 # g.addEdge("y", "x")
 
-g = Graph(["1","2","3","4","5","6"])
+g = Grafo(["1","2","3","4","5","6"])
 g.addEdge("1","2")
 g.addEdge("1","4")
 g.addEdge("2","5")
