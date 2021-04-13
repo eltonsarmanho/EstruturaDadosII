@@ -1,41 +1,46 @@
 
 from collections import defaultdict
 
-from Grafo.Grafo import Grafo
+from GrafoMatrix import GrafoMatrix
+from GrafoListAdj import GrafoListAdj
 
 
 class BFS:
 
     # Constructor
-    def __init__(self,vertices_):
-        pass;
-    def BFS(self, s):
-        # Marcar todos os vertices nao visitados
-        cor = ['BRANCO'] * (len(self.graph) )
-        alpha = [0] * (len(self.graph))
-        d = [float('inf')] * (len(self.graph))
+    def __init__(self,grafo):
+        self.grafo = grafo
 
-        cor[self.vertices[s]] = 'CINZA'
-        d[self.vertices[s]] = 0;
-        alpha[self.vertices[s]] = None
-        #print("Vertice %s cor: %s " % (s,cor[self.vertices[s]]))
+    def run(self, s):
+        # Marcar todos os vertices nao visitados
+        cor = ['BRANCO'] * (len(self.grafo))
+        alpha = [0] * (len(self.grafo))
+        d = [float('inf')] * (len(self.grafo))
+
+        index_origem = self.grafo.indexOfVertice(s)
+
+        cor[index_origem] = 'CINZA'
+        d[index_origem] = 0;
+        alpha[index_origem] = None
+        #print("Vertice %s cor: %s " % (s,cor[index_origem]))
         # Criar a Fila  Q<- 0
         Q = []
         Q.append(s)#Enqueue(Q,s)
         while len(Q) != 0:
             #print(Q)
             u = Q.pop(0)#Dequeue(Q)
-
-            for v in self.graph[self.vertices[u]]:
+            for vertice_adj in self.grafo.listAdjOf(u):
+                v = self.grafo.indexOfVertice(vertice_adj)
                 if cor[v] == 'BRANCO':
                     cor[v] = 'CINZA'
-                    #print("Vertice %s cor: %s " % (list(self.vertices.keys())[list(self.vertices.values()).index(v)], cor[v]))
-                    d[v] = d[self.vertices[u]] + 1
+                    #print("Vertice %s cor: %s " % (v, cor[v]))
+                    #d[v] = d[self.grafo.indexOfVertice(u)] + self.grafo.peso(u,vertice_adj)
+                    d[v] = d[self.grafo.indexOfVertice(u)] + 1
                     alpha[v] = u
-                    Q.append(list(self.vertices.keys())[list(self.vertices.values()).index(v)])
-            cor[self.vertices[u]] = 'PRETO'
+                    Q.append(vertice_adj)
+            cor[self.grafo.indexOfVertice(u)] = 'PRETO'
 
-            #print("Vertice %s cor: %s " % (u, cor[self.vertices[u]]))
+            #print("Vertice %s cor: %s " % (u, cor[self.grafo.indexOfVertice(u)]))
         print(d)
 
 # Driver code
@@ -72,15 +77,36 @@ class BFS:
 # g.addEdge("y", "u")
 # g.addEdge("y", "x")
 
-g = Grafo(["1","2","3","4","5","6"])
-g.addEdge("1","2")
-g.addEdge("1","4")
-g.addEdge("2","5")
-g.addEdge("4","2")
-g.addEdge("5","4")
-g.addEdge("3","5")
-g.addEdge("3","6")
-g.addEdge("6","6")
+# g = GrafoListAdj()
+# for v in ["1","2","3","4","5","6"]:
+#     g.add_vertice(v)
+#
+# g.add_aresta("1","2")
+# g.add_aresta("1","4")
+# g.add_aresta("2","5")
+# g.add_aresta("4","2")
+# g.add_aresta("5","4")
+# g.add_aresta("3","5")
+# g.add_aresta("3","6")
+# g.add_aresta("6","6")
+#
+# print("Seguinte Percurso usando BFS (iniciando do vértice 3)")
+# bfs = BFS(grafo=g)
+# bfs.run("3")
 
-print("Following is Breadth First Traversal (starting from vertex 3)")
-g.BFS("3")
+
+g = GrafoMatrix()
+for v in ["0", "1", "2", "3", "4"]:
+    g.add_vertice(v)
+g.add_aresta("0", "1", 1)
+g.add_aresta("0", "4", 10)
+g.add_aresta("0", "3", 3)
+
+g.add_aresta("1", "2", 5)
+g.add_aresta("2", "4", 1)
+
+g.add_aresta("3", "2", 2)
+g.add_aresta("3", "4", 6)
+
+bfs = BFS(grafo=g)
+bfs.run("0")

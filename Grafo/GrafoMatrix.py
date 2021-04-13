@@ -1,18 +1,12 @@
-"""
-Implementa Grafo como Matriz de adj
-"""
 class GrafoMatrix:
-
     def __init__(self):
         """
         Implementa Grafo como Matrix de adjacências
         """
-
         # Armazena os vertices no Grafo
         self.vertices = []
         # Armazena numero de vertices no Grafo
         self.vertices_no = 0
-
         self.grafo = []
 
     def add_vertice(self, v):
@@ -24,13 +18,15 @@ class GrafoMatrix:
       else:
         self.vertices_no = self.vertices_no + 1
         self.vertices.append(v)
+        #Verifica se Numero de Vertices maior que 1
         if self.vertices_no > 1:
-            for vertex in self.grafo:
-                vertex.append(0)
-        temp = []
+            for coluna_matrix in self.grafo:
+                coluna_matrix.append(0)
+
+        linha_matrix = []
         for i in range(self.vertices_no):
-            temp.append(0)
-        self.grafo.append(temp)
+            linha_matrix.append(0)
+        self.grafo.append(linha_matrix)
 
     def add_aresta(self, v1, v2, e=1):
         """
@@ -41,7 +37,7 @@ class GrafoMatrix:
             print("Vertice ", v1, " Nao existe.")
         # Verifica se vertice V2 é válido
         elif v2 not in self.vertices:
-            print("Vertex ", v2, " does not exist.")
+            print("Vertice ", v2, " does not exist.")
         #Considerando Grafo Direcionado
         else:
             index1 = self.vertices.index(v1)
@@ -67,8 +63,27 @@ class GrafoMatrix:
         for linha in self.grafo:
             representacao = representacao + str(linha) +"\n"
         return '%s' % (representacao)
+
     def __len__(self):
         return len(self.grafo)
+
+    def listAdjOf(self,v):
+        verticeAtual = self.vertices.index(v)
+        verticesAdj_index = [position for position, valor in enumerate(self.grafo[verticeAtual]) if valor >= 1]
+        return [self.vertices[index] for index in verticesAdj_index]
+
+    def listVertices(self):
+        return self.vertices;
+
+    def indexOfVertice(self,v):
+        return self.vertices.index(v)
+
+    def peso(self,u,v):
+        index1 = self.vertices.index(u)
+        index2 = self.vertices.index(v)
+        return self.grafo[index1][index2];
+
+    #def delta(self,u,v):
 
 if __name__ == '__main__':
     grafo = GrafoMatrix()
@@ -79,10 +94,12 @@ if __name__ == '__main__':
     grafo.add_vertice("E")
 
     grafo.add_aresta("A", "B",)
-    grafo.add_aresta("A", "C",)
+    grafo.add_aresta("A", "C",2)
     grafo.add_aresta("B", "C",)
     grafo.add_aresta("C", "E",)
     grafo.add_aresta("E", "A",)
     grafo.show_vertices()
     print(grafo)
-    print(len(grafo))
+    print(grafo.listAdjOf('A'))
+    print(grafo.peso('A', 'C'))
+

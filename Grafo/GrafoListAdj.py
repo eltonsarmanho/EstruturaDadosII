@@ -14,7 +14,7 @@ class GrafoListAdj:
       :param v:
       """
       if v in self.grafo:
-        print("Vertex ", v, " already exists.")
+        print("Vertex ", v, " existe")
       else:
         self.grafo[v] = []
 
@@ -25,16 +25,16 @@ class GrafoListAdj:
       :param v2:
       :param e: Peso da aresta
       """
-      # Check if vertex v1 is a valid vertex
+      # Verifica se v1 é válido
       if v1 not in self.grafo:
-        print("Vertex ", v1, " does not exist.")
-      # Check if vertex v2 is a valid vertex
+        print("Vertice ", v1, " não existe.")
+      # Verifica se v2 é válido
       elif v2 not in self.grafo:
-        print("Vertex ", v2, " does not exist.")
+        print("Vertice ", v2, " não existe.")
       else:
         # Considerando Grafo Direcionado
-        #temp = [v2, e]#Colocando Peso
-        self.grafo[v1].append(v2)
+        temp = [v2, e]#Colocando Peso
+        self.grafo[v1].append(temp)
 
     def show_vertices(self):
       """
@@ -57,6 +57,20 @@ class GrafoListAdj:
     def __len__(self):
         return len(self.grafo.keys())
 
+    def listAdjOf(self,v):
+        return self.grafo[v]
+
+    def listVertices(self):
+        return list(self.grafo.keys())
+
+    def indexOfVertice(self,v):
+        return list(self.grafo.keys()).index(v)
+
+    def peso(self,u,v):
+        for item in self.grafo[u]:
+            if(item[0] == v):
+                return item[1]
+        return 1;
 if __name__ == '__main__':
     grafo = GrafoListAdj()
 
@@ -70,6 +84,8 @@ if __name__ == '__main__':
     grafo.add_aresta("B", "C", )
     grafo.add_aresta("C", "E", )
     grafo.add_aresta("E", "A", )
-    grafo.show_vertices()
+    #grafo.show_vertices()
     print(grafo)
-    print(len(grafo))
+    print(grafo.listAdjOf('A'))
+    print(grafo.peso('A','C'))
+    #print(len(grafo))
