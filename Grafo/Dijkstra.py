@@ -35,7 +35,7 @@ class Dijkstra:
         print(self.d)
         print(self.S)
 if __name__ == '__main__':
-    g = GrafoMatrix()
+    g = GrafoListAdj()
     for v in ["0", "1", "2", "3", "4"]:
         g.add_vertice(v)
     g.add_aresta("0", "1", 1)
@@ -51,8 +51,8 @@ if __name__ == '__main__':
 
 
     print("Seguinte Percurso usando DFS")
-    #dfs = Dijkstra(grafo=g)
-    #dfs.run("0")
+    dfs = Dijkstra(grafo=g)
+    dfs.run("0")
 
     g = GrafoMatrix()
     for v in ["a", "b", "c", "d", "e"]:

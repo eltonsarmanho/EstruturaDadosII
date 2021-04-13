@@ -58,7 +58,7 @@ class GrafoListAdj:
         return len(self.grafo.keys())
 
     def listAdjOf(self,v):
-        return self.grafo[v]
+        return [vertices for vertices,peso in self.grafo[v]]
 
     def listVertices(self):
         return list(self.grafo.keys())
@@ -79,13 +79,14 @@ if __name__ == '__main__':
     grafo.add_vertice("C")
     grafo.add_vertice("E")
 
-    grafo.add_aresta("A", "B", )
-    grafo.add_aresta("A", "C", )
-    grafo.add_aresta("B", "C", )
-    grafo.add_aresta("C", "E", )
-    grafo.add_aresta("E", "A", )
+    grafo.add_aresta("A", "B", 1)
+    grafo.add_aresta("A", "C",1 )
+    grafo.add_aresta("B", "C",1 )
+    grafo.add_aresta("C", "E", 1)
+    grafo.add_aresta("E", "A",1 )
     #grafo.show_vertices()
     print(grafo)
     print(grafo.listAdjOf('A'))
     print(grafo.peso('A','C'))
+    print(grafo.indexOfVertice('A'))
     #print(len(grafo))
