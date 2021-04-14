@@ -50,6 +50,7 @@ class GrafoListAdj:
         Printa o grafo como lista de adj
         """
         representacao = ""
+
         for vertice, lista in self.grafo.items():
             representacao = representacao + str(vertice) +"-->"+str(lista)+"\n"
         return '%s' % (representacao)
@@ -58,7 +59,7 @@ class GrafoListAdj:
         return len(self.grafo.keys())
 
     def listAdjOf(self,v):
-        return [vertices for vertices,peso in self.grafo[v]]
+        return [vertices for vertices,peso in self.grafo[v] ]
 
     def listVertices(self):
         return list(self.grafo.keys())
@@ -68,8 +69,10 @@ class GrafoListAdj:
 
     def peso(self,u,v):
         for item in self.grafo[u]:
-            if(item[0] == v):
-                return item[1]
+            vertice_adjacente = item[0]
+            if(vertice_adjacente == v):
+                peso = item[1]
+                return peso;
         return 1;
 if __name__ == '__main__':
     grafo = GrafoListAdj()
@@ -79,11 +82,11 @@ if __name__ == '__main__':
     grafo.add_vertice("C")
     grafo.add_vertice("E")
 
-    grafo.add_aresta("A", "B", 1)
-    grafo.add_aresta("A", "C",1 )
-    grafo.add_aresta("B", "C",1 )
-    grafo.add_aresta("C", "E", 1)
-    grafo.add_aresta("E", "A",1 )
+    grafo.add_aresta("A", "B")
+    grafo.add_aresta("A", "C",2)
+    grafo.add_aresta("B", "C")
+    grafo.add_aresta("C", "E")
+    grafo.add_aresta("E", "A")
     #grafo.show_vertices()
     print(grafo)
     print(grafo.listAdjOf('A'))

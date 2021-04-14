@@ -34,17 +34,19 @@ class CaminhoCurto:
             self.caminhos = []
             self.run(s, d)
 
+            #Caminho mais perto da origem
             caminho_minimo_size = len(min(self.caminhos, key=len))
             menor = float('inf')
 
             for caminho in self.caminhos:
                 if(len(caminho) == caminho_minimo_size):
-                    aux = 0
+                    peso_caminho = 0
+                    caminho.pop(0)# Caminho - {S} /Remove vertice Origem uma vez que computa com S na primeira iteracao
                     for v in caminho:
-                        aux = aux + self.grafo.peso(s,v)
+                        peso_caminho = peso_caminho + self.grafo.peso(s,v)
                         s = v
-                    if (aux < menor):
-                        menor = aux;
+                    if (peso_caminho < menor):
+                        menor = peso_caminho;
             return  (menor,d)
 
         def run(self, s, d):

@@ -24,8 +24,7 @@ class Dijkstra:
         for v in self.grafo.listVertices():
             u = path.arvoreMinima(s, v)
             self.Q.put(u)
-
-        #print(self.Q.queue)
+        print("Fila de Prioridade ",self.Q.queue)
         while not self.Q.empty():
             u = self.Q.get()[1]
             self.S.append(u)
@@ -48,11 +47,9 @@ if __name__ == '__main__':
     g.add_aresta("3", "2", 2)
     g.add_aresta("3", "4", 6)
 
-
-
-    print("Seguinte Percurso usando DFS")
-    dfs = Dijkstra(grafo=g)
-    dfs.run("0")
+    print("Usando Dijkstra")
+    d = Dijkstra(grafo=g)
+    d.run("0")
 
     g = GrafoMatrix()
     for v in ["a", "b", "c", "d", "e"]:
@@ -73,7 +70,7 @@ if __name__ == '__main__':
     g.add_aresta("e", "d", 2)
 
 
-    print("Seguinte Percurso usando DFS")
+    print("Usando Dijkstra")
     dfs = Dijkstra(grafo=g)
     dfs.run("a")
 

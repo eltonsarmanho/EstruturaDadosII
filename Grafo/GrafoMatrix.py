@@ -83,8 +83,6 @@ class GrafoMatrix:
         index2 = self.vertices.index(v)
         return self.grafo[index1][index2];
 
-    #def delta(self,u,v):
-
 if __name__ == '__main__':
     grafo = GrafoMatrix()
 
@@ -93,13 +91,14 @@ if __name__ == '__main__':
     grafo.add_vertice("C")
     grafo.add_vertice("E")
 
-    grafo.add_aresta("A", "B",)
-    grafo.add_aresta("A", "C",2)
-    grafo.add_aresta("B", "C",)
-    grafo.add_aresta("C", "E",)
-    grafo.add_aresta("E", "A",)
+    grafo.add_aresta("A", "B")
+    grafo.add_aresta("A", "C")
+    grafo.add_aresta("B", "C")
+    grafo.add_aresta("C", "E")
+    grafo.add_aresta("E", "A")
+    grafo.add_aresta("E", "E")
     grafo.show_vertices()
     print(grafo)
-    print(grafo.listAdjOf('A'))
-    print(grafo.peso('A', 'C'))
+    print(grafo.listAdjOf('E'))
+    print(grafo.peso('E', 'A'))
 
