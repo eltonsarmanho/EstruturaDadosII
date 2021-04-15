@@ -50,27 +50,51 @@ if __name__ == '__main__':
     print("Usando Dijkstra")
     d = Dijkstra(grafo=g)
     d.run("0")
+    #
+    # g = GrafoMatrix()
+    # for v in ["a", "b", "c", "d", "e"]:
+    #     g.add_vertice(v)
+    # g.add_aresta("a", "b", 2)
+    # g.add_aresta("a", "c", 12)
+    #
+    # g.add_aresta("b", "c", 8)
+    # g.add_aresta("b", "e", 9)
+    #
+    # g.add_aresta("c", "d", 6)
+    # g.add_aresta("c", "e", 3)
+    #
+    # g.add_aresta("d", "a",10 )
+    # g.add_aresta("d", "e", 4)
+    #
+    # g.add_aresta("e", "b",4 )
+    # g.add_aresta("e", "d", 2)
+    #
+    #
+    # print("Usando Dijkstra")
+    # dfs = Dijkstra(grafo=g)
+    # dfs.run("a")
+    #
+    # g = GrafoMatrix()
+    # for v in ["a", "b", "c", "d", "e"]:
+    #     g.add_vertice(v)
+    # g.add_aresta("a", "b", 2)
+    # g.add_aresta("a", "c", 12)
+    #
+    # g.add_aresta("b", "c", 8)
+    # g.add_aresta("b", "e", 9)
+    #
+    # g.add_aresta("c", "d", 6)
+    # g.add_aresta("c", "e", 3)
+    #
+    # g.add_aresta("d", "a", 10)
+    # g.add_aresta("d", "e", 4)
+    #
+    # g.add_aresta("e", "b", 4)
+    # g.add_aresta("e", "d", 2)
+    #
+    # print("Usando Dijkstra")
+    # dfs = Dijkstra(grafo=g)
+    # dfs.run("a")
 
-    g = GrafoMatrix()
-    for v in ["a", "b", "c", "d", "e"]:
-        g.add_vertice(v)
-    g.add_aresta("a", "b", 2)
-    g.add_aresta("a", "c", 12)
 
-    g.add_aresta("b", "c", 8)
-    g.add_aresta("b", "e", 9)
-
-    g.add_aresta("c", "d", 6)
-    g.add_aresta("c", "e", 3)
-
-    g.add_aresta("d", "a",10 )
-    g.add_aresta("d", "e", 4)
-
-    g.add_aresta("e", "b",4 )
-    g.add_aresta("e", "d", 2)
-
-
-    print("Usando Dijkstra")
-    dfs = Dijkstra(grafo=g)
-    dfs.run("a")
 
