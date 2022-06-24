@@ -133,9 +133,9 @@ if __name__ == '__main__':
     for chave in [20, 80, 35, 90,70]:
         nodo = NodoArvore(chave,None,None)
         raiz.insere(nodo)
-    #print("Árvore: ", raiz)
+    print("Árvore: ", raiz.direita.esquerda)
 
-    raiz.preOrdem()
+    #raiz.preOrdem()
 
     #raiz.inOrdem()
     #
@@ -147,11 +147,4 @@ if __name__ == '__main__':
     #else:
     #    print("Busca pela chave {}: Falha!".format(chave))
 
-    #(9 * 11) + (5 * 7)
-    tokenList = ['(', 5,  '*', 7,')','+','(',9, '*', 11,')',  'end']
-    tree = NodoArvore()
-    expressao = tree.getSoma(tokenList)
-    print(expressao)
-    print(expressao.esquerda)
-    print(expressao.direita)
-    #print(expressao.inOrdem())
+
