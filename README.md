@@ -21,7 +21,7 @@ Este repositório contém os códigos desenvolvidos durante as aulas da discipli
 
 ---
 
-## Estrutura do Projeto
+## Estrutura do Projeto (Versão em C e Python)
 
 ```plaintext
 EstruturaDadosII/
