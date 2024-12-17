@@ -21,23 +21,38 @@ Este repositório contém os códigos desenvolvidos durante as aulas da discipli
 
 ---
 
-## Estrutura do Projeto (Versão em C e Python)
+## Estrutura do Projeto
 
 ```plaintext
 EstruturaDadosII/
-
-│-- ArvoreBinaria/             # Arquivos relacionados a árvores binárias
-│   ├── ArvoreBinaria.c        # Código-fonte da árvore binária
+│-- Arvore/                    # Estruturas de Árvores
+│   ├── C/                     # Implementações em C
+│   │   ├── Arvore.c           # Código-fonte da árvore em C
+│   ├── Arvore.py              # Implementação da árvore em Python
+│
+│-- Grafo/                     # Estruturas e algoritmos de Grafos
+│   ├── C/                     # Implementações em C
+│   │   ├── BFS.c              # Busca em Largura (BFS) em C
+│   │   ├── DFS.c              # Busca em Profundidade (DFS) em C
+│   │   ├── listaAdj.c         # Lista de Adjacência em C
+│   │   ├── MatrizAdj.c        # Matriz de Adjacência em C
+│   ├── BFS.py                 # Busca em Largura (BFS) em Python
+│   ├── DFS.py                 # Busca em Profundidade (DFS) em Python
+│   ├── CaminhoCurto.py        # Algoritmo de Caminho mais Curto
+│   ├── Dijkstra.py            # Implementação do algoritmo de Dijkstra
+│   ├── Grafo.py               # Estrutura básica de Grafos em Python
+│   ├── GrafoListAdj.py        # Lista de Adjacência em Python
+│   ├── GrafoMatrix.py         # Matriz de Adjacência em Python
+│
 │-- Hash/                      # Estruturas de Hash
-│   ├── HashDuplo              # Configuração de Hash Duplo
-│   ├── HashDuplo.c            # Código-fonte do Hash Duplo
-│   ├── Hashing/               # Outras implementações de Hash
-│   ├── Hashing.c              # Código-fonte do Hashing
-│-- Grafos/                    # Implementação de Grafos
-│   ├── BFS.c                  # Código-fonte da busca em largura (BFS)
-│   ├── DFS.c                  # Código-fonte da busca em profundidade
-│   ├── listaAdj.c             # Código-fonte da lista de adjacência
-│   ├── MatrizAdj.c            # Código-fonte da matriz de adjacência
-│-- main/                      # Arquivo principal do projeto
-│   ├── main.c                 # Código-fonte principal
+│   ├── C/                     # Implementações em C
+│   │   ├── HashDuplo.c        # Hash Duplo em C
+│   │   ├── Hashing.c          # Hashing em C
+│   │   ├── HashingChain.c     # Hashing com Encadeamento em C
+│   ├── HashFunction.py        # Funções de Hash em Python
+│   ├── HashFunctionChain.py   # Hash com Encadeamento em Python
+│   ├── HashFunctionOpenAddressing.py  # Hash com Endereçamento Aberto em Python
+│
+│-- README.md                  # Documentação do projeto
+
 
