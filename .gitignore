@@ -1,0 +1,32 @@
+# Ignorar tudo por padrão
+*
+
+# Permitir arquivos PDF
+!*.pdf
+
+# Permitir arquivos C
+!*.c
+!*.h
+
+# Permitir arquivos Python
+!*.py
+
+# Permitir diretórios (necessário para navegar na estrutura)
+!*/
+
+# Permitir o próprio .gitignore
+!.gitignore
+
+# Ignorar arquivos compilados e temporários
+*.o
+*.out
+*.exe
+*.pyc
+__pycache__/
+*.so
+*.a
+.venv/
+venv/
+
+# Ignorar pasta output do C
+output/livros/*.pdf
