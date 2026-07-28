@@ -131,8 +131,8 @@ if __name__ == '__main__':
     raiz = NodoArvore(40)
 
     for chave in [20, 80, 35, 90,70]:
-        nodo = NodoArvore(chave,None,None)
-        raiz.insere(nodo)
+        folha = NodoArvore(chave,None,None)#Toda vez que Nodo é criado ele é UMA FOLHA
+        raiz.insere(folha)
     print("Árvore: ", raiz.direita.esquerda)
 
     #raiz.preOrdem()

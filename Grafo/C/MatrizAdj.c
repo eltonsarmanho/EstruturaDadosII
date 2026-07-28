@@ -34,7 +34,7 @@ void imprimirMatrizAdjacencia(Grafo* grafo) {
         printf("\n");
     }
 }
-/*
+
 int main() {
     Grafo grafo;
     int numVertices = 5;
@@ -53,5 +53,3 @@ int main() {
 
     return 0;
 }
-
-*/
