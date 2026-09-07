@@ -1,0 +1,632 @@
+\documentclass[aspectratio=43,10pt]{beamer}
+\usetheme{Montpellier}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,booktabs,listings,url,tikz,fontawesome5,graphicx}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+% ---------------------------------------------------------------------------
+% Paleta e estilos TikZ
+% ---------------------------------------------------------------------------
+\definecolor{treeblue}{RGB}{34,92,135}
+\definecolor{treegreen}{RGB}{55,122,86}
+\definecolor{treeorange}{RGB}{207,119,37}
+\definecolor{treered}{RGB}{176,60,60}
+
+\tikzset{
+  node/.style={circle,draw=treeblue,fill=blue!9,thick,minimum size=6.5mm,inner sep=0pt,font=\small},
+  key/.style={node,draw=treeorange,fill=orange!17},
+  leaf/.style={node,draw=treegreen,fill=green!13},
+  edge/.style={draw=treeblue,thick,-{Stealth[length=2mm]}},
+  plain/.style={draw=treeblue,thick},
+  decision/.style={diamond,draw=treeblue,fill=blue!9,thick,align=center,aspect=2,font=\scriptsize,inner sep=1.5pt},
+  outcome/.style={rounded corners,draw=treegreen,fill=green!13,thick,align=center,font=\scriptsize,minimum height=6mm},
+  folder/.style={draw=treeblue,rounded corners,fill=blue!9,thick,align=center,font=\scriptsize,inner sep=3pt},
+  filenode/.style={draw=treegreen,rounded corners,fill=green!12,thick,align=center,font=\scriptsize,inner sep=2.5pt},
+  % Espaçamento por nível: a distância entre irmãos do nível 2 é
+  % deliberadamente menor que a do nível 1, para que "primos" de subárvores
+  % vizinhas nunca fiquem colineares e se sobreponham.
+  arv/.style={
+    level distance=11mm,
+    level 1/.style={sibling distance=20mm},
+    level 2/.style={sibling distance=9mm},
+    edge from parent/.style={draw=treeblue,thick},
+  },
+}
+
+\lstset{basicstyle=\ttfamily\scriptsize,keywordstyle=\bfseries\color{treeblue},commentstyle=\itshape\color{treegreen},showstringspaces=false,frame=single,breaklines=true,columns=fullflexible}
+
+\title[Estruturas de Dados: Árvores]{Estruturas de Dados: Árvores}
+\author[Elton Sarmanho]{Professor: Elton Sarmanho\inst{1}\\\small \faEnvelope\,\href{mailto:eltonss@ufpa.br}{eltonss@ufpa.br}}
+\institute[UFPA]{\inst{1}\faUniversity\, Faculdade de Sistemas de Informação -- UFPA/CUTINS}
+\date{\today}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{\hfill\insertshorttitle\hspace{1em}\insertframenumber/\inserttotalframenumber\hspace{1em}\vspace{.5em}}
+\setlength{\columnsep}{6pt}
+
+% ---------------------------------------------------------------------------
+% Macros de diagramas reutilizáveis
+% ---------------------------------------------------------------------------
+
+% Árvore de referência A-B-C-D-E-F-G, usada em vários slides conceituais.
+\newcommand{\ABC}{%
+\begin{tikzpicture}[arv,baseline=(current bounding box.center)]
+\node[node]{A}
+  child{node[node]{B} child{node[leaf]{D}} child{node[leaf]{E}}}
+  child{node[node]{C} child{node[leaf]{F}} child{node[leaf]{G}}};
+\end{tikzpicture}}
+
+% Mesma árvore, com nível anotado entre parênteses (usa espaçamento maior
+% porque os rótulos "A (0)" etc. são mais largos que uma letra isolada).
+\newcommand{\ABCNiveis}{%
+\begin{tikzpicture}[
+    level distance=13mm,
+    level 1/.style={sibling distance=26mm},
+    level 2/.style={sibling distance=13mm},
+    edge from parent/.style={draw=treeblue,thick},
+    baseline=(current bounding box.center)]
+\node[key]{A\,(0)}
+  child{node[node]{B\,(1)} child{node[leaf]{D\,(2)}} child{node[leaf]{E\,(2)}}}
+  child{node[node]{C\,(1)} child{node[leaf]{F\,(2)}} child{node[leaf]{G\,(2)}}};
+\end{tikzpicture}}
+
+% Árvore binária de busca 50/30/70/20/40/60/80.
+\newcommand{\BST}{%
+\begin{tikzpicture}[arv,baseline=(current bounding box.center)]
+\node[key]{50}
+  child{node[node]{30} child{node[leaf]{20}} child{node[leaf]{40}}}
+  child{node[node]{70} child{node[leaf]{60}} child{node[leaf]{80}}};
+\end{tikzpicture}}
+
+% Pequena árvore de diretórios que ilustra hierarquia de arquivos.
+\newcommand{\FileTreeDiagram}{%
+\begin{tikzpicture}[
+    level distance=10mm,
+    level 1/.style={sibling distance=27mm},
+    edge from parent/.style={draw=treeblue,thick},
+    baseline=(current bounding box.center)]
+\node[folder]{\faFolderOpen\ /}
+  child{node[folder]{\faFolder\ Aulas} child{node[filenode]{\faFile\ Slides}}}
+  child{node[folder]{\faFolder\ Dados} child{node[filenode]{\faFile\ Notas}}};
+\end{tikzpicture}}
+
+% Remoção em ABB, caso "nó folha": remover 3 de {4,2,6,1,3,7}.
+\newcommand{\DeleteLeafDiagram}{%
+\begin{tikzpicture}[x=6.3mm,y=6.3mm,baseline=(current bounding box.center)]
+\node[font=\small] at (0,1.0) {Antes: remover 3};
+\node[node] (r1) at (0,0) {4};
+\node[node] (l1) at (-1,-1) {2};
+\node[node] (q1) at (1,-1) {6};
+\node[leaf] (a1) at (-1.5,-2) {1};
+\node[leaf,draw=treeorange,fill=orange!18] (x1) at (-.5,-2) {3};
+\node[leaf] (z1) at (1.5,-2) {7};
+\draw[plain] (r1)--(l1) (r1)--(q1) (l1)--(a1) (l1)--(x1) (q1)--(z1);
+\node[font=\small] at (5,1.0) {Depois};
+\node[node] (r2) at (5,0) {4};
+\node[node] (l2) at (4,-1) {2};
+\node[node] (q2) at (6,-1) {6};
+\node[leaf] (a2) at (3.5,-2) {1};
+\node[leaf] (z2) at (6.5,-2) {7};
+\draw[plain] (r2)--(l2) (r2)--(q2) (l2)--(a2) (q2)--(z2);
+\end{tikzpicture}}
+
+% Remoção em ABB, caso "um filho": remover 20 de {10,5,20,30}.
+\newcommand{\DeleteOneChildDiagram}{%
+\begin{tikzpicture}[node distance=23mm,baseline=(current bounding box.center)]
+\node[font=\small] (a) {Antes: remover 20};
+\node[font=\small,right=44mm of a] (b) {Depois};
+\node[node,below=7mm of a] (r1) {10};
+\node[leaf,below left=11mm and 13mm of r1] (l1) {5};
+\node[key,below right=11mm and 13mm of r1] (x1) {20};
+\node[leaf,below=11mm of x1] (y1) {30};
+\draw[plain] (r1)--(l1) (r1)--(x1) (x1)--(y1);
+\node[node,below=7mm of b] (r2) {10};
+\node[leaf,below left=11mm and 13mm of r2] (l2) {5};
+\node[leaf,below right=11mm and 13mm of r2] (y2) {30};
+\draw[plain] (r2)--(l2) (r2)--(y2);
+\end{tikzpicture}}
+
+% Remoção em ABB, caso "dois filhos": remover 15, sucessor 20.
+\newcommand{\DeleteTwoChildrenDiagram}{%
+\begin{tikzpicture}[baseline=(current bounding box.center)]
+\node[key] (r) {15};
+\node[node,below left=11mm and 13mm of r] (l) {10};
+\node[node,below right=11mm and 13mm of r] (q) {25};
+\node[leaf,below left=11mm and 8mm of q,draw=treeorange,fill=orange!18] (s1) {20};
+\node[leaf,below right=11mm and 8mm of q] (s2) {30};
+\draw[plain] (r)--(l) (r)--(q) (q)--(s1) (q)--(s2);
+\end{tikzpicture}}
+
+% Rotação simples à esquerda (caso RR): inserir 12 sob 6-8.
+\newcommand{\RotationLeftDiagram}{%
+\begin{tikzpicture}[x=6.3mm,y=6.3mm,baseline=(current bounding box.center)]
+\node[font=\scriptsize] at (0,1.0) {Antes};
+\node[key] (a) at (0,0) {6};
+\node[node] (b) at (1,-1) {8};
+\node[leaf] (c) at (2,-2) {12};
+\draw[plain] (a)--(b)--(c);
+\node[font=\large] at (3.1,-.7) {\faArrowRight};
+\node[font=\scriptsize] at (5.8,1.0) {Depois};
+\node[key] (r) at (5.8,0) {8};
+\node[leaf] (l) at (4.8,-1) {6};
+\node[leaf] (q) at (6.8,-1) {12};
+\draw[plain] (r)--(l) (r)--(q);
+\end{tikzpicture}}
+
+% Rotação dupla direita-esquerda (caso RL): inserir 7 sob 6-8.
+\newcommand{\RotationRLDiagram}{%
+\begin{tikzpicture}[x=6.3mm,y=6.3mm,baseline=(current bounding box.center)]
+\node[font=\scriptsize] at (0,1.0) {Antes};
+\node[key] (a) at (0,0) {6};
+\node[node] (b) at (1,-1) {8};
+\node[leaf] (c) at (.2,-2) {7};
+\draw[plain] (a)--(b) (b)--(c);
+\node[font=\large] at (3.1,-.7) {\faArrowRight};
+\node[font=\scriptsize] at (5.8,1.0) {Depois};
+\node[key] (r) at (5.8,0) {7};
+\node[leaf] (l) at (4.8,-1) {6};
+\node[leaf] (q) at (6.8,-1) {8};
+\draw[plain] (r)--(l) (r)--(q);
+\end{tikzpicture}}
+
+% Árvore de decisão de crédito (renda / histórico). Diamantes com largura
+% fixa e rótulos em duas linhas para caber no espaço da coluna; as etiquetas
+% sim/não ficam em selos com fundo branco sobre a aresta, sem tocar os nós.
+\newcommand{\DecisionTreeDiagram}{%
+\resizebox{.94\linewidth}{!}{%
+\begin{tikzpicture}[
+    x=1mm,y=1mm,
+    decision/.style={diamond,draw=treeblue,thick,fill=blue!6,align=center,
+      font=\fontsize{5.6}{6.4}\selectfont,inner sep=1pt,minimum width=20mm,minimum height=11.5mm},
+    outok/.style={rounded corners=1.6pt,draw=treegreen,thick,fill=green!14,align=center,
+      font=\fontsize{5.6}{6.4}\selectfont,minimum width=16mm,minimum height=6.5mm,inner sep=1.5pt},
+    outwarn/.style={rounded corners=1.6pt,draw=treeorange,thick,fill=orange!16,align=center,
+      font=\fontsize{5.6}{6.4}\selectfont,minimum width=16mm,minimum height=6.5mm,inner sep=1.5pt},
+    outno/.style={rounded corners=1.6pt,draw=treered,thick,fill=red!7,align=center,
+      font=\fontsize{5.6}{6.4}\selectfont,minimum width=16mm,minimum height=6.5mm,inner sep=1.5pt},
+    lbl/.style={font=\fontsize{5}{5}\selectfont,fill=white,inner sep=1.2pt,rounded corners=1pt},
+    baseline=(current bounding box.center)]
+\node[decision] (income)  at (0,0)     {Renda mensal\\$>$ R\$\,3\,mil?};
+\node[decision] (history) at (-12,-19) {Histórico de\\crédito bom?};
+\node[outno]    (reject)  at (14,-19)  {\faTimesCircle\ Não aprovar};
+\node[outok]    (approve) at (-20,-37) {\faCheckCircle\ Aprovar};
+\node[outwarn]  (review)  at (-3,-37)  {\faSearch\ Analisar};
+\draw[edge] (income)  -- (history) node[lbl,pos=.55,sloped]{sim};
+\draw[edge] (income)  -- (reject)  node[lbl,pos=.5,sloped]{não};
+\draw[edge] (history) -- (approve) node[lbl,pos=.55,sloped]{sim};
+\draw[edge] (history) -- (review)  node[lbl,pos=.5,sloped]{não};
+\end{tikzpicture}}}
+
+\begin{document}
+
+\begin{frame}\titlepage\end{frame}
+
+\begin{frame}{Roteiro da Aula}
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Introdução às Árvores}
+\subsection{Objetivos de Aprendizagem}
+\begin{frame}{Objetivos de Aprendizagem}
+  \begin{itemize}
+    \item O que é uma árvore e como ela difere de estruturas lineares?
+    \item O que caracteriza uma árvore binária e uma árvore binária de busca?
+    \item Quando uma ABB é eficiente? Quais são seus percursos principais?
+    \item Por que a AVL precisa de rotações? Onde árvores de decisão se aplicam?
+  \end{itemize}
+\end{frame}
+
+\subsection{Conceitos Fundamentais}
+\begin{frame}{Por que usar árvores?}
+  \begin{columns}[T]
+    \column{.55\textwidth}
+    \begin{itemize}
+      \item Listas, pilhas e filas são estruturas \alert{lineares}: guardam os dados em uma única sequência.
+      \item Diretórios, organogramas e árvores genealógicas têm relações hierárquicas, não lineares.
+      \item Uma árvore representa essas hierarquias diretamente: um mesmo item pode ter vários outros abaixo dele.
+    \end{itemize}
+    \column{.4\textwidth}\centering
+    \FileTreeDiagram
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Definição formal de uma árvore}
+  \begin{itemize}
+    \item Uma árvore é vazia ou consiste em uma raiz e zero ou mais subárvores disjuntas.
+    \item Cada raiz de subárvore conecta-se à raiz principal por uma aresta.
+    \item Formalmente: $T=(r,S)$, em que $r$ é a raiz e $S=\{T_1,T_2,\ldots,T_n\}$ é o conjunto de subárvores.
+  \end{itemize}
+  \vfill\centering
+  \ABC
+\end{frame}
+
+\subsection{Nomenclatura Essencial}
+\begin{frame}{Nó raiz, pai, filho e irmãos}
+  \begin{columns}[T]
+    \column{.42\textwidth}
+    \begin{itemize}
+      \item \textbf{Raiz}: único nó sem pai (A).
+      \item \textbf{Pai e filho}: B é pai de D e E.
+      \item \textbf{Irmãos}: D e E compartilham o mesmo pai, B.
+      \item \textbf{Nível}: distância até a raiz; A está no nível 0.
+    \end{itemize}
+    \column{.54\textwidth}\centering
+    \ABCNiveis
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Folhas, nós internos, ancestral e descendente}
+  \begin{columns}
+    \column{.48\textwidth}
+    \begin{itemize}
+      \item \textbf{Folha}: não possui filhos (D, E, F, G).
+      \item \textbf{Nó interno}: possui ao menos um filho (A, B, C).
+      \item $u$ é \textbf{ancestral} de $v$ se pertence ao caminho da raiz até $v$; $v$ é descendente de $u$.
+    \end{itemize}
+    \column{.47\textwidth}\centering
+    \ABC\\[1mm]
+    \scriptsize A é ancestral de todos os outros nós.
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Grau, nível e altura}
+  \begin{columns}
+    \column{.48\textwidth}
+    \begin{itemize}
+      \item \textbf{Grau}: número de filhos; o grau de B é 2.
+      \item \textbf{Nível}: número de arestas desde a raiz.
+      \item \textbf{Altura}: maior nível entre as folhas; aqui, $h=2$.
+    \end{itemize}
+    \column{.47\textwidth}\centering
+    \ABC
+  \end{columns}
+\end{frame}
+
+\section{Árvore Binária}
+\subsection{Conceito e Estrutura}
+\begin{frame}{Árvore binária}
+  \begin{itemize}
+    \item Cada nó interno possui \alert{no máximo dois filhos}.
+    \item Eles são distintos: subárvore esquerda (LST) e direita (RST).
+    \item Formalmente, $T=(x,L,R)$, em que $x$ é a raiz e $L,R$ são árvores binárias disjuntas.
+  \end{itemize}
+  \vfill\centering
+  \ABC\\
+  \scriptsize A ordem esquerda--direita importa.
+\end{frame}
+
+\subsection{Tipos de Árvores Binárias}
+\begin{frame}{Árvore estritamente binária}
+  \begin{columns}
+    \column{.53\textwidth}
+    \textbf{Definição}\par\medskip
+    Todo nó possui 0 filhos (folha) ou exatamente 2 filhos; nenhum possui apenas 1 filho.\par\medskip
+    Se há $f$ folhas, há $2f-1$ nós.
+    \column{.4\textwidth}\centering
+    \begin{tikzpicture}[arv,baseline=(current bounding box.center)]
+      \node[node]{A}
+        child{node[leaf]{B}}
+        child{node[node]{C} child{node[leaf]{F}} child{node[leaf]{G}}};
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Árvore binária cheia (perfeita)}
+  \begin{columns}
+    \column{.51\textwidth}
+    \textbf{Definição}\par\medskip
+    Todo nó interno possui dois filhos e todas as folhas estão no mesmo nível. Se a altura é $h$, há $2^{h+1}-1$ nós.
+    \column{.44\textwidth}\centering
+    \ABC
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Árvore binária completa}
+  \begin{columns}
+    \column{.53\textwidth}
+    \textbf{Definição}\par\medskip
+    Todos os níveis, exceto talvez o último, estão preenchidos; no último, os nós ficam o mais à esquerda possível. Essa forma sustenta os heaps binários.
+    \column{.4\textwidth}\centering
+    \begin{tikzpicture}[arv,baseline=(current bounding box.center)]
+      \node[node]{A}
+        child{node[node]{B} child{node[leaf]{D}} child{node[leaf]{E}}}
+        child{node[node]{C} child{node[leaf]{F}} child[missing]{}};
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\subsection{Árvore Binária de Busca (ABB)}
+\begin{frame}{Árvore binária de busca (ABB)}
+  \begin{columns}
+    \column{.5\textwidth}
+    \begin{itemize}
+      \item Na subárvore esquerda de $x$, os valores são menores que $x$.
+      \item Na direita, os valores são maiores ou iguais a $x$ (convenção adotada aqui).
+      \item A propriedade de ordem indica qual ramo explorar em cada passo.
+    \end{itemize}
+    \column{.45\textwidth}\centering
+    \BST
+  \end{columns}
+\end{frame}
+
+\subsection{Operações em ABB}
+\begin{frame}{Operação de inserção em ABB}
+  \begin{itemize}
+    \item A inserção começa na raiz; o novo nó sempre termina como folha.
+    \item Compare a chave: menor segue à esquerda, maior ou igual segue à direita, até chegar a um ponteiro nulo.
+    \item Custo médio em árvore balanceada: $O(\log n)$; no pior caso, degenerado: $O(n)$.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Inserção do nó 45: passos 1 e 2}
+  \begin{columns}
+    \column{.5\textwidth}\centering
+    \begin{tikzpicture}[arv,baseline=(current bounding box.center)]
+      \node[key]{50}
+        child{node[key]{30} child{node[leaf]{20}} child{node[key]{40}}}
+        child{node[node]{70}};
+    \end{tikzpicture}
+    \column{.45\textwidth}
+    \begin{enumerate}
+      \item $45<50$: desça à esquerda.
+      \item $45>30$: desça à direita.
+    \end{enumerate}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Inserção do nó 45: passos 3 e 4}
+  \begin{columns}
+    \column{.5\textwidth}\centering
+    \begin{tikzpicture}[arv,baseline=(current bounding box.center)]
+      \node[key]{50}
+        child{node[key]{30} child{node[leaf]{20}}
+          child{node[key]{40} child[missing]{} child{node[leaf,draw=treeorange,fill=orange!18]{45}}}}
+        child{node[node]{70}};
+    \end{tikzpicture}
+    \column{.45\textwidth}
+    \begin{enumerate}
+      \setcounter{enumi}{2}
+      \item $45>40$: tente ir à direita.
+      \item A posição é nula: insira 45.
+    \end{enumerate}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Operação de remoção em ABB}
+  \begin{enumerate}
+    \item \textbf{Folha}: desconecte o nó.
+    \item \textbf{Um filho}: conecte o pai diretamente ao filho do nó removido.
+    \item \textbf{Dois filhos}: use o sucessor em ordem (menor da direita) ou o predecessor (maior da esquerda); copie a chave e remova-o do local original.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Remoção: caso 1 (nó folha)}
+  \centering
+  \DeleteLeafDiagram
+\end{frame}
+
+\begin{frame}{Remoção: caso 2 (um filho)}
+  \centering
+  \DeleteOneChildDiagram
+\end{frame}
+
+\begin{frame}{Remoção: caso 3 (dois filhos)}
+  \begin{columns}
+    \column{.44\textwidth}\small
+    Ao remover 15, o sucessor em ordem é 20, o menor valor da subárvore direita. Copie essa chave para a raiz e remova a folha 20 original.
+    \column{.51\textwidth}\centering
+    \DeleteTwoChildrenDiagram
+  \end{columns}
+\end{frame}
+
+\subsection{Algoritmos de Percurso}
+\begin{frame}{Percursos em árvores binárias}
+  Todos visitam cada nó uma vez: custo $O(n)$. O que muda entre eles é apenas a posição da visita à raiz:
+  \begin{itemize}
+    \item Pré-ordem: raiz, esquerda, direita.
+    \item Em ordem: esquerda, raiz, direita.
+    \item Pós-ordem: esquerda, direita, raiz.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Percurso em pré-ordem (Raiz, Esquerda, Direita)}
+  \begin{columns}
+    \column{.44\textwidth}
+    \begin{enumerate}
+      \item Visite a raiz.
+      \item Percorra a esquerda.
+      \item Percorra a direita.
+    \end{enumerate}
+    \alert{A, B, D, E, C, F, G}.
+    \column{.5\textwidth}\centering
+    \ABC
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Percurso em ordem (Esquerda, Raiz, Direita)}
+  \begin{columns}
+    \column{.44\textwidth}
+    \begin{enumerate}
+      \item Percorra a esquerda.
+      \item Visite a raiz.
+      \item Percorra a direita.
+    \end{enumerate}
+    \alert{D, B, E, A, F, C, G}. Em uma ABB, as chaves saem em ordem crescente.
+    \column{.5\textwidth}\centering
+    \ABC
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Percurso em pós-ordem (Esquerda, Direita, Raiz)}
+  \begin{columns}
+    \column{.44\textwidth}
+    \begin{enumerate}
+      \item Percorra a esquerda.
+      \item Percorra a direita.
+      \item Visite a raiz.
+    \end{enumerate}
+    \alert{D, E, B, F, G, C, A}.
+    \column{.5\textwidth}\centering
+    \ABC
+  \end{columns}
+\end{frame}
+
+\subsection{Implementação}
+\begin{frame}[fragile]{Implementação de uma ABB em Python}
+\begin{lstlisting}[language=Python]
+class No:
+    def __init__(self, chave):
+        self.chave, self.esq, self.dir = chave, None, None
+
+def inserir(raiz, chave):
+    if raiz is None: return No(chave)
+    if chave < raiz.chave:
+        raiz.esq = inserir(raiz.esq, chave)
+    else: raiz.dir = inserir(raiz.dir, chave)
+    return raiz
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Percurso em ordem}
+\begin{lstlisting}[language=Python]
+def em_ordem(no):
+    if no is not None:
+        em_ordem(no.esq)
+        print(no.chave, end=" ")
+        em_ordem(no.dir)
+\end{lstlisting}
+Em uma ABB, essa função imprime as chaves em ordem não decrescente.
+\end{frame}
+
+\section{Árvore AVL}
+\subsection{O Problema do Desbalanceamento}
+\begin{frame}{O problema do desbalanceamento}
+  \begin{columns}
+    \column{.48\textwidth}\centering
+    \textbf{Balanceada}\\\scriptsize Busca $O(\log n)$\\[1mm]
+    \begin{tikzpicture}[
+        level distance=9mm,level 1/.style={sibling distance=16mm},level 2/.style={sibling distance=7mm},
+        edge from parent/.style={draw=treeblue,thick}]
+      \node[node]{4}
+        child{node[node]{2} child{node[leaf]{1}} child{node[leaf]{3}}}
+        child{node[node]{6} child{node[leaf]{5}} child{node[leaf]{7}}};
+    \end{tikzpicture}
+    \column{.48\textwidth}\centering
+    \textbf{Degenerada}\\\scriptsize Busca $O(n)$\\[1mm]
+    \begin{tikzpicture}[level distance=8mm,sibling distance=10mm,edge from parent/.style={draw=treeblue,thick}]
+      \node[node]{1}
+        child[missing]{}
+        child{node[node]{2} child[missing]{} child{node[node]{3} child[missing]{} child{node[leaf]{4}}}};
+    \end{tikzpicture}
+  \end{columns}
+  \vfill\centering
+  \alert{Solução: ABB autobalanceável, como a AVL.}
+\end{frame}
+
+\subsection{Conceito de Árvore AVL}
+\begin{frame}{Árvore AVL: definição}
+  \begin{itemize}
+    \item Uma AVL (Adelson-Velskii e Landis) é uma ABB com uma condição extra sobre a altura das subárvores.
+    \item $FB(no)=h(\text{direita})-h(\text{esquerda})$.
+    \item Em uma AVL, $FB\in\{-1,0,1\}$; os valores $-2$ ou $2$ exigem rebalanceamento.
+    \item Com essa condição, busca, inserção e remoção ficam em $O(\log n)$.
+  \end{itemize}
+\end{frame}
+
+\subsection{Rotações em Árvores AVL}
+\begin{frame}{Rebalanceamento com rotações}
+  Uma rotação reorganiza poucos nós, preserva a ordem da ABB e recupera o equilíbrio de altura.
+  \medskip
+  \centering\small
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{FB do nó} & \textbf{FB do filho pesado} & \textbf{Rotação} \\
+    \midrule
+    $+2$ & $0$ ou $+1$ & simples à esquerda (caso RR) \\
+    $+2$ & $-1$        & dupla direita--esquerda (caso RL) \\
+    $-2$ & $0$ ou $-1$ & simples à direita (caso LL) \\
+    $-2$ & $+1$        & dupla esquerda--direita (caso LR) \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Rotação simples à esquerda}
+  \begin{columns}
+    \column{.46\textwidth}\small
+    Após inserir 12, o nó 6 fica com $FB(6)=+2$. Como o caminho pesado segue para a direita de 8, temos o caso RR: a rotação coloca 8 na raiz local.
+    \column{.49\textwidth}\centering
+    \RotationLeftDiagram
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Rotação dupla direita--esquerda}
+  \begin{columns}
+    \column{.46\textwidth}\small
+    Ao inserir 7, surge um caminho em "joelho": $FB(6)=+2$ e $FB(8)=-1$. Primeiro rotacionamos 8 à direita; em seguida, 6 à esquerda.
+    \column{.49\textwidth}\centering
+    \RotationRLDiagram
+  \end{columns}
+\end{frame}
+
+\section{Árvores de Decisão: aplicação atual}
+\subsection{Conceito, avaliação e estado da arte}
+\begin{frame}{Árvore de decisão: da estrutura ao modelo}
+  \begin{columns}
+    \column{.52\textwidth}
+    \begin{itemize}
+      \item No aprendizado supervisionado, cada nó testa uma variável; as arestas registram os resultados possíveis, e as folhas retornam uma classe ou um valor.
+      \item O treinamento procura divisões que reduzam a impureza (entropia ou índice Gini) ou o erro de regressão.
+      \item Profundidade limitada, poda e validação em dados separados ajudam a conter o sobreajuste.
+    \end{itemize}
+    \column{.43\textwidth}\centering
+    \DecisionTreeDiagram
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Avaliação responsável}
+  \begin{itemize}
+    \item Separe treino, validação e teste. Ajuste hiperparâmetros somente com os dados de validação.
+    \item Quando as classes são desbalanceadas, acompanhe precisão, revocação, F1, PR-AUC e a matriz de confusão -- acurácia isolada pode esconder erros relevantes.
+    \item Procure vazamento de alvo e compare o desempenho entre subgrupos que façam sentido para o problema.
+    \item Decisões de alto impacto exigem revisão humana, registro das escolhas e acompanhamento após a implantação.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Árvores em métodos atuais para dados tabulares}
+  \small
+  \begin{itemize}
+    \item Uma árvore isolada é fácil de explicar. Florestas aleatórias combinam muitas árvores para reduzir a variância.
+    \item Em \textit{gradient boosting}, cada árvore nova corrige os erros do conjunto anterior; XGBoost, LightGBM e CatBoost são implementações amplamente usadas.
+    \item Esses conjuntos costumam ganhar em desempenho, mas são mais difíceis de explicar do que uma árvore isolada -- a comparação deve seguir o protocolo de avaliação do problema.
+  \end{itemize}
+  \vfill\scriptsize Fontes: Chen e Guestrin (2016); Ke et al. (2017); Prokhorenkova et al. (2018).
+\end{frame}
+
+\section{Conclusões}
+\begin{frame}{Conclusões}
+  \begin{itemize}
+    \item Árvores modelam hierarquias; árvores binárias limitam cada nó a dois filhos ordenados.
+    \item ABBs são eficientes quando a altura é pequena; a AVL garante $O(\log n)$ com rotações.
+    \item Pré-ordem, em ordem e pós-ordem custam $O(n)$ e servem a objetivos distintos.
+    \item Árvores de decisão aplicam essa estrutura a classificação e regressão; avaliação e governança são essenciais.
+  \end{itemize}
+\end{frame}
+
+\section{Referências Bibliográficas}
+\begin{frame}[allowframebreaks]{Referências}
+\scriptsize
+\begin{thebibliography}{99}
+\bibitem{lee} Lee, K. D.; Hubbard, S. \textit{Data Structures and Algorithms with Python}. Springer, 2015.
+\bibitem{clrs} Cormen, T. H. et al. \textit{Introduction to Algorithms}. 3. ed. MIT Press, 2009.
+\bibitem{sz} Szwarcfiter, J. L.; Markenzon, L. \textit{Estruturas de Dados e seus Algoritmos}. LTC, 2015.
+\bibitem{breiman} Breiman, L. Random Forests. \textit{Machine Learning}, 45, 5--32, 2001.
+\bibitem{xgb} Chen, T.; Guestrin, C. XGBoost: A Scalable Tree Boosting System. \textit{KDD}, 2016. \url{https://doi.org/10.1145/2939672.2939785}
+\bibitem{lgb} Ke, G. et al. LightGBM: A Highly Efficient Gradient Boosting Decision Tree. \textit{NeurIPS}, 2017. \url{https://proceedings.neurips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html}
+\bibitem{cat} Prokhorenkova, L. et al. CatBoost: unbiased boosting with categorical features. \textit{NeurIPS}, 2018. \url{https://proceedings.neurips.cc/paper/2018/hash/14491b756b3a51daac41c24863285549-Abstract.html}
+\end{thebibliography}
+\end{frame}
+
+\begin{frame}\titlepage\end{frame}
+
+\end{document}

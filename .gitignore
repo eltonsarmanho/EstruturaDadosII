@@ -3,7 +3,7 @@
 
 # Permitir arquivos PDF
 !*.pdf
-
+!*.tex
 # Permitir arquivos C
 !*.c
 !*.h
@@ -27,6 +27,6 @@ __pycache__/
 *.a
 .venv/
 venv/
-
+*Prova/
 # Ignorar pasta output do C
 output/livros/*.pdf
