@@ -1,0 +1,2215 @@
+\documentclass{beamer}
+\usepackage[T1]{fontenc}
+
+% ---------------------------------------------------------------------------
+% Paleta fiel ao material original desta aula (extraída por amostragem de
+% pixels do PDF fonte): azul petróleo no cabeçalho/título, azul vivo nos
+% blocos, vermelho nos marcadores e amarelo/laranja/verde nos arrays.
+% ---------------------------------------------------------------------------
+\definecolor{hheader}{RGB}{0,102,153}
+\definecolor{hblock}{RGB}{1,146,225}
+\definecolor{hblockbg}{RGB}{191,228,248}
+\definecolor{haccent}{RGB}{215,15,3}
+\definecolor{hband}{RGB}{225,225,225}
+\definecolor{hyellow}{RGB}{255,204,0}
+\definecolor{horange}{RGB}{255,102,0}
+\definecolor{hgreen}{RGB}{159,212,0}
+\definecolor{hcode}{RGB}{60,60,60}
+
+\setbeamercolor{title in head/foot}{bg=hheader,fg=white}
+\setbeamercolor{section in head/foot}{bg=hband,fg=haccent}
+\setbeamercolor{subsection in head/foot}{bg=hband,fg=haccent}
+\setbeamercolor{frametitle}{bg=hheader,fg=white}
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamercolor{block title}{bg=hblock,fg=white}
+\setbeamercolor{block body}{bg=hblockbg,fg=black}
+\setbeamercolor{itemize item}{fg=haccent}
+\setbeamercolor{itemize subitem}{fg=haccent}
+\setbeamercolor{itemize subsubitem}{fg=haccent}
+\setbeamercolor{section in toc}{fg=haccent}
+\setbeamercolor{subsection in toc}{fg=black!75}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[triangle]
+\setbeamertemplate{caption}[numbered]
+
+% Cabeçalho: mesmo template do outer theme "tree" (usado pelo Montpellier),
+% com a contagem de página adicionada na barra superior.
+\makeatletter
+\setbeamertemplate{headline}{%
+    \begin{beamercolorbox}[wd=\paperwidth,colsep=1.5pt]{upper separation line head}
+    \end{beamercolorbox}
+    {\usebeamerfont{title in head/foot}%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}
+      \insertshorttitle\hfill\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}}
+    {\usebeamerfont{section in head/foot}%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{section in head/foot}
+        \setbox\beamer@tempbox=\hbox{\insertsectionhead}%
+        \ifdim\wd\beamer@tempbox>1pt%
+          \hskip2pt\raise1.9pt\hbox{\vrule width0.4pt height1.875ex\vrule width 5pt height0.4pt}\hskip1pt%
+        \fi%
+      \insertsectionhead
+    \end{beamercolorbox}}
+    {\usebeamerfont{subsection in head/foot}%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{subsection in head/foot}
+        \setbox\beamer@tempbox=\hbox{\insertsubsectionhead}%
+        \ifdim\wd\beamer@tempbox>1pt%
+          \hskip9.4pt\raise1.9pt\hbox{\vrule width0.4pt height1.875ex\vrule width 5pt height0.4pt}\hskip1pt%
+        \fi%
+      \insertsubsectionhead
+    \end{beamercolorbox}}
+    \begin{beamercolorbox}[wd=\paperwidth,colsep=1.5pt]{lower separation line head}
+    \end{beamercolorbox}
+}
+
+
+% listings precisa estar carregado antes de \lstdefinestyle abaixo.
+\usepackage{listings}
+
+% Definição do estilo para Python
+\lstdefinestyle{PythonStyle}{
+    language=Python,
+    basicstyle=\ttfamily,
+    keywordstyle=\bfseries\color{blue},
+    commentstyle=\itshape\color{green!60!black},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    columns=flexible,
+    frame=single,
+    breaklines=true,
+    literate={None}{{\textbf{None}}}4,
+    morekeywords={if, class,for, self},
+}
+
+% Definição do estilo para C
+\lstdefinestyle{CStyle}{
+    language=C,
+    basicstyle=\ttfamily,
+    keywordstyle=\bfseries\color{blue},
+    commentstyle=\itshape\color{green!60!black},
+    stringstyle=\color{orange},
+    showstringspaces=false,
+    columns=flexible,
+    frame=single,
+    breaklines=true,
+    literate={NULL}{{\textbf{NULL}}}4,
+}
+
+
+\setbeamerfont{headline}{size=\footnotesize}
+
+\mode<presentation>{
+\usetheme{Montpellier}
+\setbeamercovered{transparent}
+\usecolortheme{lsc}
+}
+
+\mode<handout>{
+  % tema simples para ser impresso
+  \usepackage[bar]{beamerthemetree}
+   % Colocando um fundo cinza quando for gerar transparências para serem impressas
+  % mais de uma transparência por página
+  \beamertemplatesolidbackgroundcolor{black!5}
+}
+
+
+\usepackage{amsmath,amssymb}
+\usepackage[brazil]{varioref}
+\usepackage[english,brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{fontawesome}
+
+%\usepackage[latin1]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{colortbl}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit}
+\usepackage{transparent}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{exercise,chngcntr}
+
+\definecolor{maroon}{cmyk}{0, 0.87, 0.68, 0.32}
+\definecolor{halfgray}{gray}{0.55}
+\definecolor{ipython_frame}{RGB}{207, 207, 207}
+\definecolor{ipython_bg}{RGB}{247, 247, 247}
+\definecolor{ipython_red}{RGB}{186, 33, 33}
+\definecolor{ipython_green}{RGB}{0, 128, 0}
+\definecolor{ipython_cyan}{RGB}{64, 128, 128}
+\definecolor{ipython_purple}{RGB}{170, 34, 255}
+
+\beamertemplatetransparentcovereddynamic
+\addtobeamertemplate{title page}{\centering{ \includegraphics[width=1.25cm]{figs/logo.png}}}{}
+\title[Estrutura de Dados II]{Hash}
+\author[Elton Sarmanho]{ 
+Professor: Elton Sarmanho\inst{1} 
+\newline
+E-mail: \href{mailto:eltonss@ufpa.br}{eltonss@ufpa.br}\newline
+\href{https://github.com/eltonsarmanho}{\faGithub} \href{https://www.linkedin.com/in/elton-sarmanho-836553185/}{\faLinkedinSquare}
+}   
+  \institute[UFPA]{
+   \inst{1}%
+     Faculdade de Sistemas de Informação - UFPA/CUTINS
+     }     
+ 
+% Se comentar a linha abaixo, irá aparecer a data quando foi compilada a apresentação  
+\date{\today}
+\pgfdeclareimage[height= 1.25 cm]{inf}{figs/logo.png}
+% pode-se colocar o LOGO assim
+\logo{{\transparent{0.35}\pgfuseimage{inf}}}
+
+% \AtBeginSection[]{
+%   \begin{frame}<beamer>
+%     \frametitle{Roteiro}
+%     \tableofcontents[currentsection,currentsubsection]
+%   \end{frame}  
+% }
+
+\setbeamertemplate{navigation symbols}{\insertframenavigationsymbol \insertsectionnavigationsymbol \insertbackfindforwardnavigationsymbol} 
+
+
+\expandafter\def\expandafter\insertshorttitle\expandafter{%
+  \insertshorttitle\hfill%
+  \insertframenumber\,/\,\inserttotalframenumber}
+  \renewcounter{Exercise}[section]
+  \newcounter{Example}
+
+% ---------------------------------------------------------------------------
+% Definições usadas pelos diagramas nativos em TikZ da seção "Hashing na
+% Prática" (cores e estilos de nó/seta que faltavam neste arquivo e faziam
+% os diagramas compilar sem cor/borda/seta).
+% ---------------------------------------------------------------------------
+\definecolor{hyellow}{RGB}{255,204,0}
+\definecolor{horange}{RGB}{255,102,0}
+\definecolor{hgreen}{RGB}{159,212,0}
+\definecolor{hcode}{RGB}{60,60,60}
+\tikzset{
+  cell/.style={draw=black!70,thick,minimum width=6.5mm,minimum height=6.5mm,inner sep=0pt,font=\scriptsize,anchor=center},
+  cellY/.style={cell,fill=hyellow},
+  cellO/.style={cell,fill=horange},
+  cellG/.style={cell,fill=hgreen},
+  cellW/.style={cell,fill=white},
+  idx/.style={font=\tiny,text=black!55},
+  slot/.style={draw=black!70,thick,minimum width=9mm,minimum height=6mm,inner sep=1pt,font=\scriptsize},
+  keytag/.style={draw=hheader,thick,rounded corners=1pt,fill=hblockbg,font=\scriptsize,inner sep=1.5pt,minimum width=7mm},
+  uset/.style={ellipse,draw=black!70,thick,minimum width=26mm,minimum height=20mm},
+  harrow/.style={-{Stealth[length=1.6mm]},thick,draw=black!70},
+  redarrow/.style={-{Stealth[length=1.6mm]},thick,draw=haccent},
+  chainnode/.style={draw=hheader,thick,fill=hblockbg,minimum width=5.5mm,minimum height=5.5mm,inner sep=0pt,font=\tiny},
+}
+
+\begin{document}
+
+\setbeamertemplate{logo}{}
+\begin{frame}
+\titlepage
+\end{frame}
+%Começar mostrar Logo apos slide de titulo
+\logo{{\transparent{0.35}\pgfuseimage{inf}}}
+
+\begin{frame}
+\frametitle{Roteiro}
+\tableofcontents[sections={1-2}]
+\end{frame}
+ \begin{frame}
+ \frametitle{Roteiro}
+ \tableofcontents[sections={3-4}]
+ \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Hash}
+
+\subsection{Introdução}
+\begin{frame}
+ \begin{itemize}
+  \item Os métodos de busca linear ou binária baseiam-se na comparação da chave de busca com as chaves dos registros armazenados na tabela.
+ \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}
+ 		  \column{0.39\linewidth}
+ 		  \small
+          \begin{block}{Busca Sequencial}
+ 		  \begin{description}
+              \item[Melhor Caso] $O(1)$ 
+              \item[Pior Caso] $O(n)$ 
+             \end{description} 
+ 		  \end{block}           
+          \column{0.7\linewidth}
+        \begin{figure}[h]
+        \centering 
+        \includegraphics[bb=0 0 141 74,scale=1.3]{figs/buscasequencial.png}
+        %\caption*{Nomenclatura dos Componentes}
+        \end{figure}          
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}
+ 		  \column{0.39\linewidth}
+ 		  \small
+          \begin{block}{Busca binária}
+          Chave é comparada com registro que se encontra no meio do array ordenado
+ 		  \begin{description}
+               
+              \item[Melhor Caso] $O(1)$ 
+              \item[Pior Caso] $O(\log n)$ 
+             \end{description} 
+ 		  \end{block}           
+          \column{0.7\linewidth}
+        \begin{figure}[h]
+        \centering 
+        \includegraphics[bb=0 0 75 62,scale=1.8]{figs/buscaBinaria.png}
+
+        %\caption*{Nomenclatura dos Componentes}
+        \end{figure}          
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+ \begin{itemize}
+  \item A busca pode ser mais rápida se existir uma relação direta entre a posição em que o registro se encontra na tabela e a sua chave a ser localizada.
+  \item Organizamos os dados em uma nova estrutura de dados chamada \textbf{Tabela Hash}
+  \begin{itemize}
+  \item Média por operação de $\theta(1)$, sendo o pior caso, entretanto, $O(n)$
+  \end{itemize}
+
+  
+ \end{itemize}
+\end{frame}
+
+\subsection{Características}
+\begin{frame}
+ \begin{itemize}
+  \item Os registros são armazenados em uma tabela $T$, sequencial e de dimensão $m$.
+  \item As posições da tabela que se situam no intervalo $[0, m – 1]$ são calculadas através de sua chave por meio de uma função de dispersão (\textit{Hash Function})
+  \begin{itemize}
+   \item $h: U \rightarrow \{0,1,...,m-1\} $
+   \item Universo das chaves $U$
+   \item Conjunto dos endereços $\{0,1,...,m-1\}$ 
+  \end{itemize}
+  \item $h$ mapeia o universo $U$ de chaves nos endereços de uma tabela $T$ chamada de \textbf{tabela hash}(\textit{hash table})
+ \end{itemize}
+\end{frame}
+
+\begin{frame}
+ \begin{columns}
+ 		  \column{0.39\linewidth}
+ 		  \small
+
+          \begin{block}{Técnica de Acesso Direto} 		   
+            \begin{itemize}
+            \item número de chaves $n$
+            \item número de endereços da tabela $m$
+            \item $n\leq m$
+            \item Todas operações $O(1)$
+            \end{itemize} 
+ 		  \end{block}           
+          \column{0.7\linewidth}
+        \begin{figure}[h]
+        \centering
+       \includegraphics[bb=0 0 231 113,scale=0.8]{figs/acesso_direto.png}
+
+        \end{figure}      
+           
+  \end{columns}
+
+ \end{frame}
+ 
+\subsection{Problemas}
+\begin{frame}
+ \begin{itemize}
+  \item Desperdício de espaço.
+  \begin{itemize}
+   \item Exemplo: Se existem duas chaves com índices $0$ e $999.999$
+   \item A aplicação da técnica de acesso direto conduziria a uma tabela com $1.000.000$ compartimentos, dos quais apenas dois ocupados
+  \end{itemize}
+  \item Quando $n \geq m$
+  \item \textbf{Solução}: aplicar $h(k)$ $\forall$ $k \in U$
+  \begin{itemize}
+   \item A ideia é transformar cada chave $k$ em um valor no intervalo $[0, m – 1]$ usando $h(k)$
+   \item Dizemos que $h(k)$ é \textit{hash value} da chave $k$ 
+  \end{itemize}  
+ \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+
+\begin{columns}
+ 		  \column{0.5\linewidth}
+ 		   \begin{figure}[h]
+ \centering
+ \includegraphics[bb=0 0 281 100,scale=1.]{figs/funcaoHash.png}
+ \caption*{Função Hash}
+\end{figure}          
+          \column{0.6\linewidth}
+       \begin{figure}[h]
+ \centering
+ \includegraphics[bb=0 0 170 110,scale=1]{figs/acesso_direto_2.png}
+ \caption*{Acesso Direto}
+\end{figure}
+           
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+ \begin{itemize}
+  \item Função de dispersão pode não garantir \textbf{injetividade}
+ \begin{itemize}
+\item É possível a existência de outra chave $y \neq x$ 
+\item Duas chaves podem ter mesmo \textbf{valor hash} para o mesmo endereço 
+\begin{itemize}
+ \item $h(x) = h(y)$
+\end{itemize}
+
+\item Fenômeno chamado de \textbf{Colisão}
+\end{itemize}   
+ \end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[h]
+ \centering
+ \includegraphics[bb=0 0 104 79,scale=1.4]{figs/colisao.png}
+ \caption*{Exemplo de Colisão usando $h(k) = k$ $mod$ $5$}
+\end{figure}
+
+\end{frame}
+
+
+\section{Funções de Dispersão}
+\subsection{Propriedades}
+\begin{frame}
+ \begin{itemize}
+  \item Uma função de dispersão $h$ transforma uma chave $x$ em um endereço-base $h(x)$ em $T$
+  \item Uma $h(x)$ deve satisfazer às seguintes condições:
+  \begin{itemize}
+   \item produzir um número baixo de colisões;
+   \begin{itemize}
+    \item Tratamento de colisões
+   \end{itemize}
+   \item ser facilmente computável;   
+   \item ser uniforme.
+   \begin{itemize}
+    \item A probabilidade de que $h(x)$ seja igual ao endereço $k$ deve ser $\frac{1}{m}$ para todas as chaves $x$ e todos os endereços $k \in [0,m-1]$
+   \end{itemize}
+  \end{itemize}
+ \end{itemize}
+\end{frame}
+
+\subsection{Tipos de Funções}
+
+\begin{frame}{Método da Divisão}
+ \begin{itemize}
+  \item Este método é fácil e eficiente, sendo por isso muito empregado. 
+ \item A chave $x$ é dividida pela dimensão $m$ da tabela $T$, e o resto da divisão é usado como endereço.
+ $$h(x) = x  \ \mathbf{mod}\ m$$ 
+ \item Resultando em endereços no intervalo $[0,m-1]$
+ \end{itemize} 
+\end{frame}
+
+\begin{frame}{Método da Divisão}
+ \begin{itemize}
+  \item Ao usar o método da divisão, geralmente evitamos certos valores de $m$. Existem critérios para escolher um melhor $m$.
+ \begin{itemize}
+  \item Escolher $m$ de modo que seja um número primo não próximo a uma potência de 2.  
+ \end{itemize}
+ \end{itemize} 
+\end{frame}
+
+\begin{frame}{Método da Divisão}
+ \begin{figure}[h]
+ \centering
+ \includegraphics[bb=0 0 99 155,scale=.9]{figs/metodoDivisao.png}
+ % metodoDivisao.png: 414x644 px, 300dpi, 3.51x5.45 cm, bb=0 0 99 155
+ \caption*{Método da Divisão.\\ $\mathbf{m=23}$\\ $44\ \mathbf{mod} \ 23 = 21$}
+\end{figure}
+
+\end{frame}
+
+
+
+
+\begin{frame}{Método da Multiplicação}
+\begin{columns}
+ 		  \column{0.4\linewidth}
+ 		  \footnotesize
+          \begin{block}{} 		   
+            \begin{itemize}
+  \item Endereço é calculado em duas etapas.
+  \item A chave $k$ é multiplicada por uma constante $A \ \in \ ]0,1[$. O resultado é armazenado em $s$. Extrai a parte fracionada de $kA$
+  \item Multiplica parte fracionada por $m$ e computa \textit{floor} $\lfloor \rfloor$ .
+  $$h(k) = \lfloor m \ (kA \ \mathbf{mod} \ 1)\rfloor$$  
+ \end{itemize} 
+ 		  \end{block}           
+          \column{0.7\linewidth}
+        \begin{figure}[h]
+        \centering       
+ \includegraphics[bb=0 0 122 64,scale=1.3]{figs/metodoMulti.png}
+ % metodoMulti.png: 508x267 px, 300dpi, 4.30x2.26 cm, bb=0 0 122 64
+        \end{figure}      
+           
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}{Método da Multiplicação}
+\begin{itemize}
+ \item Vantagem desse método é que valor de $m$ não é crítico
+ \item Embora esse método funcione com qualquer valor da constante $A$, ele funciona melhor com alguns valores do que com outros. 
+ \begin{itemize}
+\item A escolha ideal depende das características dos dados que estão sendo armazenados 
+\item Knuth sugere:
+$$A \approx \ \dfrac{(\sqrt{5}-1)}{2} = 0.6180...$$
+\end{itemize}
+
+\end{itemize}
+
+
+\end{frame}
+
+\begin{frame}{Exercício A - Método de Divisão}
+\begin{itemize}
+ \item Considere uma Tabela hash de tamanho $m = 8$. Calcule as localizações para as quais são mapeadas as chaves $[16, 23, 41, 25]$.
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Exercício A.1 - Método de Divisão}
+\begin{itemize}
+ \item Desenvolva a tabela hash com 9 slots inserindo $[$5, 28, 19, 15, 20, 33, 12, 17, 10$]$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Método da Divisão}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+#include <stdio.h>
+#define TABLE_SIZE 8
+#include <math.h>
+void initialize_table(int table[], int size) {
+    for (int i = 0; i < size; i++) {
+        table[i] = -1;// Valor inicial para indicar posicao vazia
+    }
+}
+
+void insere(int table[], int key, char funcao) {
+    if(funcao == 'D'){//Metodo da Divisao
+    int hash = key % TABLE_SIZE;
+    table[hash] = key;
+    }
+}
+
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em C - Método da Divisão}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+//Continuacao
+int main() {
+    int hash_table[TABLE_SIZE];
+    initialize_table(hash_table, TABLE_SIZE);
+    int keys[] = {16,23,41,25};
+    int num_keys = sizeof(keys) / sizeof(keys[0]);
+
+    for (int i = 0; i < num_keys; i++) {
+        int key = keys[i];
+        insere(hash_table, key,'D');
+    }
+    // Imprimir tabela hash
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        printf("Index: %d, Key: %d\n", i, hash_table[i]);
+    }
+    return 0;
+}
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em Python - Método da Divisão}
+ 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+import math
+import numpy as np
+
+class Hashing:
+    def __init__(self,funcao):
+        self.funcao = funcao
+        pass;
+    
+\end{lstlisting}
+
+
+\end{frame} 
+
+\begin{frame}[fragile]{Implementação em Python - Método da Divisão}
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+    def hashingDivisao(self, chave, hashTable):
+        m = len(hashTable)
+        return chave % m;
+    # Funcao add valor na Tabela hash
+    def insere(self,hashtable, valor_chave, valor):
+        if(self.funcao == "Divisao"):
+            endereco = self.hashingDivisao(valor_chave,hashtable)
+        
+        hashtable[endereco]= valor
+    
+\end{lstlisting}
+
+
+\end{frame} 
+
+\begin{frame}[fragile]{}
+\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+if __name__ == '__main__':
+    HashTable = np.array([None]*8)
+    hashing = Hashing(funcao="Divisao")
+    hashing.insere(HashTable, 16, '16')
+    hashing.insere(HashTable, 23, '23')
+    hashing.insere(HashTable, 41, '41')
+    hashing.insere(HashTable, 25, '25')
+    hashing.display_hash(HashTable)    
+\end{lstlisting}
+\footnotesize
+\begin{block}{Resultado}
+$0 --> 16$ \\
+$1 --> 25$ \\
+$2 --> None$\\
+$3 --> None$\\
+$4 --> None$\\
+$5 --> None$\\
+$6 --> None$\\
+$7 --> 23$\\
+\end{block}
+
+\end{frame} 
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item Considere uma Tabela hash de tamanho $m = 1000$ e uma função hash correspondente $h(k)$ igual a $m \ (k A\ mod \ 1)$ para $A \approx \ \dfrac{(\sqrt{5}-1)}{2}$. Calcule as localizações para as quais são mapeadas as chaves $61, 62, 63, 64 \ e \ 65$.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(k) = \lfloor m \ (kA \ \mathbf{mod} \ 1)\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(k) = \lfloor m \ (k\dfrac{(\sqrt{5}-1)}{2} \ \mathbf{mod} \ 1)\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = \lfloor m \ (61\dfrac{(\sqrt{5}-1)}{2} \ \mathbf{mod} \ 1)\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = \lfloor m \ (37,700073314 \ \mathbf{mod} \ 1)\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = \lfloor m \ (0,700073314)\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = \lfloor 1000 \ (0,700073314)\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = \lfloor 700,073314\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = \lfloor 700,073314\rfloor$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício B - Método da Multiplicação}
+
+\begin{itemize}
+ \item m =1000
+ \item k = [61]
+ \item $A = \ \dfrac{(\sqrt{5}-1)}{2}$ 
+ $$h(61) = 700$$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Método da Multiplicação}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+//Alteramos somente metodo insere
+void insere(int table[], int key, char funcao) {
+    if(funcao == 'D'){
+        int hash = key % TABLE_SIZE;
+        table[hash] = key;
+    }
+    else if(funcao == 'M')
+    {
+        float A = (sqrt(5)-1)/2;
+        float m = TABLE_SIZE;
+
+        int hash = floor(m*(fmod(key*A , 1)));
+        table[hash] = key;
+    }
+}
+
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Método da Multiplicação}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+//Caso esteja usando linux sera preciso implementar
+//metodo floor e fmod (biblioteca math.h)
+double floor(double x) {
+    int int_part = (int)x;
+    return (double)int_part;
+}
+double fmod(double x, double y) {
+    if (y == 0.0) {
+        // Tratar divisao por zero
+        return 0.0;
+    }
+
+    double quotient = x / y;
+    double whole_part = (double)((int)quotient);
+    double remainder = x - (whole_part * y);
+    return remainder;
+}
+
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em C - Método da Multiplicação}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+#define TABLE_SIZE 1000
+.
+int main() {
+    int hash_table[TABLE_SIZE];
+    initialize_table(hash_table, TABLE_SIZE);
+    int keys[] = {61,62,63,64,65};
+    int num_keys = sizeof(keys) / sizeof(keys[0]);
+    for (int i = 0; i < num_keys; i++) {
+        int key = keys[i];
+        insere(hash_table, key,'M');
+    }
+    for (int i = 0; i < TABLE_SIZE; i++) {    // Imprimir tabela
+        printf("Index: %d, Key: %d\n", i, hash_table[i]);
+    }
+    printf("Index: %d, Key: %d\n", 700, hash_table[700]);
+    return 0;
+}
+
+\end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Implementação em Python - Método da Multiplicação}
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+    def hashingMultiplicacao(self,chave,hashTable):
+        A = (math.sqrt(5)-1)/2
+        m = len(hashTable)
+        h = math.floor(m*(chave*A % 1))
+        return h;
+
+    def insere(self,hashtable, valor_chave, valor):
+        if(self.funcao == "Divisao"):
+            endereco = self.hashingDivisao(valor_chave,hashtable)
+        elif (self.funcao == "Multiplicacao"):
+            endereco = self.hashingMultiplicacao(valor_chave,hashtable)
+        hashtable[endereco]=valor
+    
+\end{lstlisting}
+
+
+\end{frame} 
+
+\begin{frame}[fragile]{Implementação em Python - Método da Multiplicação}
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+if __name__ == '__main__':
+    HashTable = np.array([None] * 1000)
+    hashing = Hashing(funcao="Multiplicacao")
+    # Add os elementos na Tabela
+    hashing.insere(HashTable, 61, '61',)
+    hashing.insere(HashTable, 62, '62',)
+    hashing.insere(HashTable, 63, '63', )
+    hashing.insere(HashTable, 64, '64')
+    hashing.insere(HashTable, 65, '65')
+    hashing.display_hash(HashTable)   
+\end{lstlisting}
+\begin{block}{Resultado}
+$700 --> 61$ \\
+\end{block}
+
+\end{frame} 
+
+%
+% \subsection{Trabalho I - Função de dispersão}
+% \begin{frame}
+% \begin{itemize}
+%  \item Implemente o \textbf{Método da dobra}:
+%  \begin{itemize}
+%  \item Codifique usando chaves numéricas
+%  \item Codifique usando chaves de caracteres
+%  \item Não é necessário implementar Tratamento de colisões
+%  \end{itemize}
+%
+% \end{itemize}
+% \end{frame}
+% \subsection{Trabalho II - Função de dispersão}
+% \begin{frame}
+% \begin{itemize}
+%  \item Faça uma lauda sobre a relação de \textit{hashing} e \textit{blockchain}
+%  \begin{itemize}
+%   \item N equipes serão sorteadas aleatoriamente para apresentar esse trabalho.
+%   \item Faça slides
+%  \end{itemize}
+%
+% \end{itemize}
+% \end{frame}
+
+\section{Tratamento de Colisões}
+\subsection{Fator de Carga}
+\begin{frame}
+ \begin{itemize}
+  \item Já foi observado que o mesmo $h(x) = h(y)$ endereço pode ser encontrado para chaves diferentes $x \neq y$
+  \begin{itemize}
+   \item Colisão
+  \end{itemize}
+  \item Dado uma tabela $\mathbf{T}$ com $\mathbf{m}$ endereços e que armazena $\mathbf{n}$ elementos definimos \textbf{fator de carga} (\textit{load factor}):
+  \begin{itemize}
+   \item \emph{número médio de elementos armazenados em uma entrada}
+   \item $\alpha = \dfrac{n}{m}$, onde  $\alpha < 1   $, $ \alpha = 1$ e $ \alpha > 1$
+   \item $\uparrow \alpha \sim \ \uparrow $ Colisões 
+  \end{itemize}
+  \item \textbf{Encadeamento}
+ \end{itemize}
+
+\end{frame}
+
+\subsection{Encadeamento}
+\begin{frame}
+
+\begin{columns}
+        \column{0.3\linewidth}
+        \footnotesize
+         \begin{block}{}
+ 		  \begin{itemize}
+ 		    \item Colocamos todos os elementos que efetuam hash para o mesmo endereço em uma \textbf{lista ligada}.
+ 		  \end{itemize}
+
+ 		  \end{block} 
+ 
+        \column{0.7\linewidth}
+        \centering
+        \includegraphics[bb=0 0 774 365,scale=0.3]{figs/encadeamento.png}        
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\begin{columns}
+        \column{0.3\linewidth}
+        \footnotesize
+         \begin{block}{}
+ 		  \begin{itemize}
+ 		    \item Endereço $j$ contém um ponteiro para início da lista.
+ 		    \item Se caso estiver vazio, $j$ conterá nullo.
+ 		  \end{itemize}
+
+ 		  \end{block} 
+ 
+        \column{0.7\linewidth}
+        \centering
+        \includegraphics[bb=0 0 774 365,scale=0.3]{figs/encadeamento.png}        
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\begin{columns}
+        \column{0.35\linewidth}
+        \footnotesize
+         \begin{block}{Inserção}
+ 		 \begin{description}
+ 		  \item[Pior Caso] $O(1)$ 
+ 		 \end{description}
+ 		  \end{block} 
+        \begin{block}{Remoção}
+ 		 \begin{description}
+ 		  \item[Pior Caso] $O(1)$
+ 		 \end{description}
+ 		 \begin{itemize}
+ 		  \item Lista Duplamente Encadeada
+ 		  \item Método recebe como entrada um elemento $X$ e não sua chave $k$
+ 		  $$X.ant.prox = X.prox$$
+ 		  $$X.prox.ant = X.ant$$
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        
+        \column{0.7\linewidth}
+        \centering
+        \includegraphics[bb=0 0 774 365,scale=0.3]{figs/encadeamento.png}        
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\begin{columns}
+        \column{0.35\linewidth}
+        \footnotesize         
+        \begin{block}{Pesquisa}
+ 		 \begin{description}
+ 		  \item[Pior Caso] $\Theta(n)$ 
+ 		 \end{description}
+ 		 \begin{itemize}
+ 		  \item As $\mathbf{n}$ chaves no mesmo endereço, criando uma lista de dimensão $\mathbf{d}$
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.7\linewidth}
+        \centering
+        \includegraphics[bb=0 0 774 365,scale=0.3]{figs/encadeamento.png}        
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\begin{columns}
+        \column{0.35\linewidth}
+        \footnotesize         
+        \begin{block}{Pesquisa}
+ 		 \begin{description}
+ 		  \item[Sucesso] $\Theta(1+\alpha)$
+ 		  \item[Sem Sucesso] $\Theta(1+\alpha)$
+ 		 \end{description}
+ 		 \begin{itemize}
+ 		  \item Hash uniforme
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.7\linewidth}
+        \centering
+        \includegraphics[bb=0 0 774 365,scale=0.3]{figs/encadeamento.png}        
+\end{columns}
+\end{frame}
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{itemize}
+ \item Demostre a inserção das chaves \textbf{5,28,19,15,20,33,12,17,10} em uma tabela hash com colisões por encadeamento. Seja tabela com 9 posições e com função $h(k) = k \ \mathbf{mod} \ 9$  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{5,28,19,15,20,33,12,17,10}
+ 		  \item $h(k) = k \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{28,19,15,20,33,12,17,10}
+ 		  \item $h(k) = 5 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        5   & 5   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{19,15,20,33,12,17,10}
+ 		  \item $h(k) = 28 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 28  \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        5   & 5   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{15,20,33,12,17,10}
+ 		  \item $h(k) = 19 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 19$\rightarrow$28  \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        5   & 5   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{20,33,12,17,10}
+ 		  \item $h(k) = 15 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 19$\rightarrow$28  \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        5   & 5   \\ \hline
+        6   & 15   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{33,12,17,10}
+ 		  \item $h(k) = 20 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 19$\rightarrow$28  \\ \hline
+        2   & 20  \\ \hline
+            &    \\ \hline
+            &   \\ \hline
+        5   & 5   \\ \hline
+        6   & 15   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{12,17,10}
+ 		  \item $h(k) = 33 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 19$\rightarrow$28  \\ \hline
+        2   & 20  \\ \hline
+            &    \\ \hline
+            &   \\ \hline
+        5   & 5   \\ \hline
+        6   & 33 $\rightarrow$ 15   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{17,10}
+ 		  \item $h(k) = 12 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 19$\rightarrow$28  \\ \hline
+        2   & 20  \\ \hline
+        3   & 12   \\ \hline
+            &    \\ \hline
+        5   & 5   \\ \hline
+        6   & 33 $\rightarrow$ 15   \\ \hline
+            &   \\ \hline
+            &   \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{10}
+ 		  \item $h(k) = 17 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 19$\rightarrow$28  \\ \hline
+        2   & 20  \\ \hline
+        3   & 12   \\ \hline
+            &    \\ \hline
+        5   & 5   \\ \hline
+        6   & 33 $\rightarrow$ 15   \\ \hline
+            &   \\ \hline
+        8   & 17  \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+\begin{frame}{Exercício C - Encadeamento}
+\begin{columns}
+        \column{0.5\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item \textbf{$\oslash$}
+ 		  \item $h(k) = 10 \ \mathbf{mod} \ 9$  
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}
+    
+        \begin{table}[]
+        \centering
+        \footnotesize
+        \begin{tabular}{|l|l|}
+        \hline
+        h(k) & k \\ \hline
+            &   \\ \hline
+        1   & 10 $\rightarrow$ 19$\rightarrow$28  \\ \hline
+        2   & 20  \\ \hline
+        3   & 12   \\ \hline
+            &    \\ \hline
+        5   & 5   \\ \hline
+        6   & 33 $\rightarrow$ 15   \\ \hline
+            &   \\ \hline
+        8   & 17  \\ \hline
+        \end{tabular}%
+
+        \end{table}       
+        \end{columns}
+\end{frame}
+
+
+\begin{frame}{Exercício C - Aluno - Encadeamento}
+\begin{itemize}
+ \item Forneça o conteúdo da \textit{hash table} resultante quando você insere itens com as chaves ATLAS nessa ordem em uma tabela inicialmente vazia de M = 5, usando encadeamento com listas não ordenadas. Use a função hash $11k \ \mathbf{mod}\ M$ para transformar a k-ésima letra do alfabeto em um índice de tabela.
+ \item $A = 1, B = 2, ... $
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SIZE 10
+
+// Estrutura para o Nodo ou Elemento da lista encadeada
+typedef struct Element {
+    int key;
+    struct Element* next;
+} Element;
+
+// Estrutura para a tabela de hash
+typedef struct HashTable {
+    Element** table;//Ponteiro para Ponteiro
+} HashTable;
+
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+// Funcao para criar um novo elemento
+Element* createElement(int key) {
+    Element* newElement = (Element*)malloc(sizeof(Element));
+    newElement->key = key;
+    newElement->next = NULL;
+    return newElement;
+}
+// Funcao para criar a tabela de hash
+HashTable* createHashTable() {
+    HashTable* hashTable = (HashTable*)malloc(sizeof(HashTable));
+    hashTable->table =(Element**)malloc(SIZE *sizeof(Element*));
+    // Inicializar cada posicao da tabela com NULL
+    for (int i = 0; i < SIZE; i++) {
+        hashTable->table[i] = NULL;
+    }
+    return hashTable;
+}
+
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+// Funcao hash
+int hashFunction(int key) {
+    return key % SIZE;
+}
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+void insert(HashTable* hashTable, int key) {
+    int index = hashFunction(key);
+    // Criar um novo elemento ou nodo
+    Element* newElement = createElement(key);
+    // Inserir o elemento na posicao correspondente da tabela
+    if (hashTable->table[index] == NULL) {
+        // Caso a posicao esteja vazia, o novo elemento se torna a cabeca da lista
+        hashTable->table[index] = newElement;
+    } else {//Senao, add o novo elemento ao final da lista
+        Element* currentElement = hashTable->table[index];
+        while (currentElement->next != NULL) {
+            currentElement = currentElement->next;
+        }
+        currentElement->next = newElement;
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+// Funcao para imprimir a tabela de hash
+void printHashTable(HashTable* hashTable) {
+    for (int i = 0; i < SIZE; i++) {
+        printf("Posicao %d: ", i);
+        Element* currentElement = hashTable->table[i];
+        while (currentElement != NULL) {
+            printf("%d ", currentElement->key);
+            currentElement = currentElement->next;
+        }
+        printf("\n");
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+int main() {
+    // Criar a tabela de hash
+    HashTable* hashTable = createHashTable();
+
+    // Inserir elementos na tabela de hash
+    insert(hashTable, 7);
+    insert(hashTable, 12);
+    insert(hashTable, 23);
+    insert(hashTable, 35);
+    insert(hashTable, 14);
+    insert(hashTable, 13);
+    insert(hashTable, 33);
+    insert(hashTable, 40);
+    insert(hashTable, 12);
+
+    // Imprimir a tabela de hash
+    printHashTable(hashTable);
+
+    return 0;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C - Encadeamento}
+\begin{center}
+ \includegraphics[bb=0 0 481 316,scale=0.5]{figs/printHashingChainInC.png}
+ % printHashingChainInC.png: 481x316 px, 72dpi, 16.97x11.15 cm, bb=0 0 481 316
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+class HashingChain:
+    
+
+    # Funcao add valor na Tabela hash
+    def insere(self,hashtable, valor_chave, valor):
+        if(self.funcao == "Divisao"):
+            endereco = self.hashingDivisao(valor_chave,hashtable)
+        elif (self.funcao == "Multiplicacao"):
+            endereco = self.hashingMultiplicacao(valor_chave,hashtable)
+        hashtable[endereco].insert(0,valor) 
+\end{lstlisting}
+
+
+\end{frame} 
+
+\begin{frame}[fragile]{Implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+class HashingChain:
+    def display_hash(self,hashTable):
+        for i in range(len(hashTable)):
+            print(i, end=" ")
+            for j in hashTable[i]:
+                print("-->", end=" ")
+                print(j, end=" ")
+            print()
+\end{lstlisting}
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em Python} 
+\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+if __name__ == '__main__':
+    HashTable = [[] for x in range(9)]
+    hashing = HashingChain(funcao="Divisao")
+    for valor in [5,28,19,15,20,33,12,17,10]:
+        hashing.insere(HashTable, valor, str(valor))
+    hashing.display_hash(HashTable)
+\end{lstlisting}
+\begin{block}{Resultado}
+$0$\\ 
+$1 --> 10 --> 19 --> 28$\\ 
+$2 --> 20$\\ 
+$3 --> 12$\\ 
+$4$\\ 
+$5 --> 5$\\ 
+$6 --> 33 --> 15$\\ 
+$7$\\ 
+$8 --> 17$ 
+\end{block}
+\end{frame}
+
+% \subsection{Trabalho III - Encadeamento}
+% \begin{frame}
+% \begin{itemize}
+%  \item Existe a hipótese de que é possível obter ganhos substanciais de desempenho se modificarmos o esquema de encadeamento de tal modo que cada lista seja mantida em sequencia ordenada. Como modificação afeta o tempo de execução para pesquisas bem sucedidas e sem sucesso, inserções e eliminações ?
+%  \begin{itemize}
+%   \item Implemente essa tabela hash:
+%
+%   \begin{itemize}
+%   \item Implemente lista ordenada
+%   \item chaves são alphanuméricas
+%   \item Verifique em termos de notação assintótica considerando tamanho da lista.
+%   \end{itemize}
+%
+%  \end{itemize}
+%
+% \end{itemize}
+%
+% \end{frame}
+
+\subsection{Endereçamento Aberto}
+\begin{frame}
+ \begin{itemize}
+  \item Os elementos estão armazenados na própria tabela hash.
+  \item Não existem listas ou estruturas externas.
+  \item Tabela pode ficar ``cheia''  
+  \item $\alpha \leq 1$
+  \item Não usa ponteiros
+  \begin{itemize}
+   \item Calculamos a sequência de endereços
+   \item Memória extra liberada
+   \item Menor número de colisões
+   \item Recuperação mais rápida
+  \end{itemize}
+ \end{itemize}
+\end{frame}
+
+\begin{frame}
+ \begin{itemize}
+  \item \emph{Possível fornecer vários endereços a partir de uma única chave}
+  \item Processa uma análise sequêncial ou sondagem nos endereços
+  \begin{itemize}
+   \item $h: U \times \{0,1,..,m-1\} \rightarrow \{0,1,..,m-1\}$
+   \item $h(k,x)$
+  \end{itemize}
+  \item Pesquisar uma chave $k$
+  \begin{itemize}
+   \item $h(k,0)\rightarrow h(k,1)\rightarrow ... \rightarrow h(k,m-1)$
+   \begin{itemize}
+    \item Permutação de endereços para cada chave $\langle h(k,0), h(k,1),...,h(k,m-1)\rangle$
+   \end{itemize}
+   \item $x=0,...,m-1$
+   \begin{itemize}
+    \item sequência de tentativas ou sondagem
+   \end{itemize}
+   
+  \end{itemize}
+\item sequência uniforme
+\begin{itemize}
+ \item qualquer $\mathbf{m!}$ dos endereços, têm igual probabilidade de ser produzida por $\mathbf{h}$
+\end{itemize}
+
+  \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}
+ \begin{itemize}
+  \item Operação de remoção 
+  \begin{itemize}
+   \item Romperia a sequência de tentativas
+   \begin{itemize}
+    \item Tornaria impossível recuperar qualquer chave $\mathbf{k}$
+    \item Encontraria \textbf{null} no endereço
+   \end{itemize}
+
+   \item Assinalar a posição do armazenamento: 
+   \begin{description}
+    \item[Livre (L)] Quando posição não foi utilizada
+    \item[Ocupado (O)] Quando uma chave está armazenada
+    \item[Removido (R)] Quando armazena uma chave que já foi removida - uma nova chave poderá ocupar a posição marcada como removida
+   \end{description}
+  \end{itemize}
+  \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+ \begin{itemize}
+  \item Existem três métodos para a determinação da sequência de tentativas ou sondagem $h(x,k)\ \forall \ k = 0,1,...,m-1$.
+  \begin{itemize}
+   \item tentativa linear 
+   \item tentativa quadrática
+   \item hash duplo
+  \end{itemize}
+
+ \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Tentativa linear}
+\begin{itemize}
+ \item Dada função hash auxiliar $h':U\rightarrow {0,1,...,m-1}$, método de tentativa linear usa a função hash:
+ $$h(k,i) = (h'(k) + i) \ mod \ m$$
+ \item $i=0,1,...,m-1$
+ \item A ideia consiste em tentar armazenar chave $k$ em $h'(k)$, se este já está ocupado, tentar no endereço consecutivo $h'(k) + 1$, até encontrar posição vazia.
+\item Problema: \textbf{Agrupamento primário}
+\begin{itemize}                                     \item Longas sequência de posições ocupadas são construídas, aumentando o tempo médio de pesquisa. 
+\item Causa: Uma posição vazia precedida por \textbf{i} posições completas é preenchida em seguida com probabilidade $\dfrac{i+1}{m}$
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{Tentativa linear}
+\begin{columns}
+        \column{0.8\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item $m = 11$ e $h'(x) = x \ mod \ 11 $	
+ 		  \item $h(k,i) = (h'(k) + i) \ mod \ m$
+ 		  \item $[20,30,2,13,25,24,10,9]$
+ 		  \begin{itemize}
+ 		   \item $h(20,0) = h'(20)\ mod\ 11 = \mathbf{9}$
+ 		   \item $h(30,0) = h'(30)\ mod\ 11 = \mathbf{8}$
+ 		   \item $h(2,0) =  h'(2)\  mod\ 11 = \mathbf{2}$
+ 		   \item $h(13,0) =  h'(13)\  mod\ 11 = 2$ 
+ 		   \begin{itemize}
+ 		    \item $h(13,1) =  (h'(13)+1)\  mod\ 11 = \mathbf{3}$ 
+ 		   \end{itemize}
+
+ 		   \item $25\ mod\ 11 = 3\rightarrow 3+ 1 = \mathbf{4}$
+ 		   \item $24\ mod\ 11 = 2 \rightarrow 2+1 ... \rightarrow 2+3=\mathbf{5}$
+ 		   \item $10\ mod\ 11 = \mathbf{10}$
+ 		   \item $9\ mod\ 11 = 9\rightarrow 9+1\rightarrow 9+2=0$
+ 		  \end{itemize}
+
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}    
+        \centering
+        \includegraphics[bb=0 0 121 375,scale=.5]{figs/tentativaLinear.png}             
+        \end{columns}
+        
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C}
+%\centering\footnotesize
+\begin{lstlisting}[style=CStyle]
+
+int tentativaLinear(int table[],int hash)
+{
+    // Tratamento de colisao por sondagem linear
+    while (table[hash] != -1) {
+        hash = (hash + 1) % TABLE_SIZE;
+    }
+    return hash;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+void insere(int table[], int key, char funcao) {
+    if(funcao == 'D'){
+        int hash = key % TABLE_SIZE;
+        hash = tentativaLinear(table,hash)
+        table[hash] = key;
+    }
+    else if(funcao == 'M')
+    {
+        float A = (sqrt(5)-1)/2;
+        float m = TABLE_SIZE;
+        int hash = floor(m*(fmod(key*A , 1)));
+        table[hash] = key;
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em C}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+#define TABLE_SIZE 11
+
+int main() {
+    int hash_table[TABLE_SIZE];
+    initialize_table(hash_table, TABLE_SIZE);
+    int keys[] = {20,30,2,13,25,24,10,9};
+    int num_keys = sizeof(keys) / sizeof(keys[0]);
+    for (int i = 0; i < num_keys; i++) {
+        int key = keys[i];
+        insere(hash_table, key,'D');
+    }
+    // Imprimir tabela hash
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        printf("Index: %d, Key: %d\n", i, hash_table[i]);
+    }
+    return 0;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+  class HashingOpenAddressing:
+    def __init__(self,metodo):
+        self.metodo = metodo;
+
+    def linear(self, chave, hashTable):
+    #HashTable = np.array([[None] * 11, ['L'] * 11])
+        m = len(hashTable[0])
+        h1 = chave % m
+        for i in range(m):
+            h = (h1+i) %  m
+            if(hashTable[1,h] == 'L'):
+                break;
+        return h;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+  # Funcao add valor na Tabela hash
+    def insere(self,hashtable, valor_chave, valor):
+        if(self.metodo == "linear"):
+            endereco = self.linear(valor_chave,hashtable)
+        elif(self.metodo == "quadratica"):
+            endereco = self.quadratica(valor_chave, hashtable)
+        hashtable[0, endereco] = valor
+        hashtable[1, endereco] = 'O'
+    
+    def display_hash(self, hashTable):
+        for i in range(len(hashTable[0])):
+            print(str(i) + " --> " + str(hashTable[0,i])+" ("+str(hashTable[1,i])+")", end="\n")
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+    HashTable = np.array([[None] * 11, ['L'] * 11])
+    hashing = HashingOpenAddressing(metodo="linear")
+    for valor in [20, 30, 2, 13, 25, 24, 10, 9]:
+        hashing.insere(HashTable, valor, str(valor))
+    hashing.display_hash(HashTable)
+\end{lstlisting}
+\begin{block}{Resultado}
+\tiny
+$0 --> 9 (O)$\\
+$1 --> None (L)$\\
+$2 --> 2 (O)$\\
+$3 --> 13 (O)$\\
+$4 --> 25 (O)$\\
+$5 --> 24 (O)$\\
+$6 --> None (L)$\\
+$7 --> None (L)$\\
+$8 --> 30 (O)$\\
+$9 --> 20 (O)$\\
+$10 --> 10 (O)$\\
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Tentativa Quadrática}
+\begin{itemize}
+ \item \textbf{Tentativa linear} as chaves tendem a se concentrar, criando \textbf{agrupamentos primários}, que aumentam muito o tempo de busca
+ \begin{itemize}
+  \item A ideia é obter sequências de endereços diversas para endereços próximos.
+ \end{itemize}
+ $$h(k,i) = (h'(k) + c_1i + c_2i^2)\ mod \ m$$
+ \item $c1$ e $c2 \neq 0$
+ \item $i  = 0,1,...,m-1$
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tentativa Quadrática}
+\begin{itemize}
+ \item Esse método consegue evitar os agrupamentos primários da tentativa linear.
+ \item \textbf{Agrupamento Secundário}
+ \begin{itemize}
+  \item $h(k_1,0) = h(k_2,0) \rightarrow h(k_1,i) = h(k_2,i)$
+  \item Degradações são reduzidas se comparadas com a Tentaiva linear.
+ \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tentativa Quadrática}
+\begin{itemize}
+ \item Os valores $m,c_1$ e $c_2$ devem ser escolhidos de tal forma que os endereços $h(x, k)$ correspondam a varrer toda a tabela para $k=0,1,...,m-1$
+ \item As equações recorrentes fornecem uma maneira de calcular, diretamente esses endereços:
+ $$h(x,0) = h'(x)$$
+ $$h(x,k) = (h(x,k-1) + k) \ mod \ m, 0 < k < m$$
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Tentativa Quadrática}
+\begin{figure}[h]
+ \centering
+ \includegraphics[bb=0 0 172 100,scale=1.2]{figs/linear_quadratico.png}
+ % linear_quadratico.png: 718x415 px, 300dpi, 6.08x3.51 cm, bb=0 0 172 100
+ \caption*{Comparação de Comportamento}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Tentativa Quadrática}
+\begin{columns}
+        \column{0.8\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item $m = 11$ e $h'(x) = x \ mod \ 11 $ 		 
+ 		  \item $[20,30,2,13,25,24,10,9]$
+ 		  \begin{itemize}
+ 		   \item $h(20,0) = h'(20)\ mod\ 11 = \mathbf{9}$
+ 		   \item $h(30,0) = h'(30)\ mod\ 11 = \mathbf{8}$
+ 		   \item $h(2,0) =  h'(2)\  mod\ 11 = \mathbf{2}$
+ 		   \item $h(13,0) =  h'(13)\  mod\ 11 = 2$ 
+ 		   \begin{itemize}
+ 		    \item $h(13,1) =  (h'(13)+1^2)\  mod\ 11 = \mathbf{3}$ 
+ 		   \end{itemize}
+ 		   \item $25\ mod\ 11 = 3\rightarrow 3+ 1 = \mathbf{4}$
+ 		   \item $24\ mod\ 11 = 2 \rightarrow 2+1^2 \rightarrow 2+2^2=\mathbf{6}$
+ 		   \item $10\ mod\ 11 = \mathbf{10}$
+ 		   \item $9\ mod\ 11 = 9\rightarrow 9+1^2\rightarrow 9+2^2\rightarrow 9+3^2=\mathbf{7}$
+ 		  \end{itemize}
+
+ 		 \end{itemize}
+
+ 		  \end{block} 
+        \column{0.5\linewidth}    
+        \centering
+        \includegraphics[bb=0 0 36 112,scale=1.3]{figs/tentativaQuadratica.png}
+% tentativaQuadratica.png: 149x465 px, 300dpi, 1.26x3.94 cm, bb=0 0 36 112
+            
+        \end{columns}
+        
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em C}
+%\centering\footnotesize
+\begin{lstlisting}[style=CStyle]
+
+int tentativaQuadratica(int table[],int hash)
+{
+    // Tratamento de colisao por sondagem quadratica
+    for(int i = 0 ;i<TABLE_SIZE; i++)
+    {
+        int h = (hash + i*i) % TABLE_SIZE;
+        if(table[h] == -1)
+            return h;
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C}
+%\footnotesize
+\begin{lstlisting}[style=CStyle]
+void insere(int table[], int key, char funcao) {
+    if(funcao == 'D'){
+        int hash = key % TABLE_SIZE;
+        hash = tentativaQuadratica(table,hash);
+        table[hash] = key;
+    }
+    else if(funcao == 'M')
+    {
+        float A = (sqrt(5)-1)/2;
+        float m = TABLE_SIZE;
+        int hash = floor(m*(fmod(key*A , 1)));
+        table[hash] = key;
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Implementação em C}
+\footnotesize
+\begin{lstlisting}[style=CStyle]
+#define TABLE_SIZE 11
+int main() {
+    int hash_table[TABLE_SIZE];
+    initialize_table(hash_table, TABLE_SIZE);
+    int keys[] = {20,30,2,13,25,24,10,9};
+    int num_keys = sizeof(keys) / sizeof(keys[0]);
+
+    for (int i = 0; i < num_keys; i++) {
+        int key = keys[i];
+        insere(hash_table, key,'D');
+    }
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        printf("Index: %d, Key: %d\n", i, hash_table[i]);
+    }
+
+    return 0;
+}
+
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+  class HashingOpenAddressing:
+    def __init__(self,metodo):
+        self.metodo = metodo;
+
+    def quadratica(self, chave, hashTable):
+        m = len(hashTable[0])
+        h1 = chave % m
+        for i in range(m):
+            h = (h1+i*i) %  m
+            if(hashTable[1,h] == 'L'):
+                break;
+        return h;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{implementação em Python} 
+\centering\footnotesize
+\begin{lstlisting}[style=PythonStyle]
+HashTable = np.array([[None] * 11, ['L'] * 11])
+hashing = HashingOpenAddressing(metodo="quadratica")
+for valor in [20, 30, 2, 13, 25, 24, 10, 9]:
+    hashing.insere(HashTable, valor, str(valor))
+hashing.display_hash(HashTable)
+\end{lstlisting}
+\begin{block}{Resultado}
+\tiny
+$0 --> None (L)$\\
+$1 --> None (L)$\\
+$2 --> 2 (O)$\\
+$3 --> 13 (O)$\\
+$4 --> 25 (O)$\\
+$5 --> None (L)$\\
+$6 --> 24 (O)$\\
+$7 --> 9 (O)$\\
+$8 --> 30 (O)$\\
+$9 --> 20 (O)$\\
+$10 --> 10 (O)$\\
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Hash Duplo}
+\begin{itemize}
+ \item Um dos melhores métodos para endereçamento aberto
+ \item Por que as permutações produzidas possuem características de permutações aleatórias
+$$h(k,i) = (h_1(k) + i\times h_2(k))\ mod \ m$$
+\item Endereço inicial $T[h_1(k)]$
+\item Endereços sucessivos dependem da quantidade $h_2(k)$
+\item O deslocamento depende da chave $k$ de duas maneiras
+ \end{itemize}
+\end{frame}
+
+\begin{frame}{Hash Duplo}
+\begin{columns}
+        \column{0.7\linewidth}
+        \footnotesize         
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item $m = 13$ 
+ 		  \item $h_1(k) = k \ mod  \ 13$ \\ $h_2(k) = 1+ (k \ mod  \ 11)$ 	
+ 		  \item $h(k,i) = ( h_1(k) + i \times h_2(k))\ mod \ 13 $
+ 		  \item Inserir \textbf{k=14}
+ 		 \end{itemize}
+%(14 mod 13 + 2×(1+(14 mod 11))) mod 13
+ 		  \end{block} 
+        \column{0.5\linewidth}    
+        \centering
+        \includegraphics[bb=0 0 113 322,scale=0.5]{figs/hashduplo.png}            
+        \end{columns}
+
+\end{frame}
+
+
+\begin{frame}{Hash Duplo}
+\begin{columns}
+        \column{0.7\linewidth}
+        \footnotesize
+        \begin{block}{}
+ 		 \begin{itemize}
+ 		  \item $m = 13$
+ 		  \item $h_1(k) = k \ mod  \ 13$ \\ $h_2(k) = 1+ (k \ mod  \ 11)$
+ 		  \item $h(k,i) = ( h_1(k) + i \times h_2(k))\ mod \ 13 $
+ 		  \item Inserir \textbf{k=14}
+ 		  \item $((14\ mod\ 13)+0×(1+(14\ mod\ 11)))\ mod\ 13 = 1$
+ 		 \end{itemize}
+%(14 mod 13 + 2×(1+(14 mod 11))) mod 13
+ 		  \end{block}
+        \column{0.5\linewidth}
+        \centering
+        \includegraphics[bb=0 0 113 322,scale=0.5]{figs/hashduplo.png}
+        \end{columns}
+
+\end{frame}
+
+\begin{frame}{Hash Duplo}
+\begin{itemize}
+ \item Análise do hash do endereço aberto
+ \begin{itemize}
+  \item \emph{Hash uniforme}
+  \item Em termos de $\alpha \leq 1$ e $n \leq m$ 
+ \end{itemize}
+\item Pesquisa
+\begin{itemize}
+ \item  malsucedida é executada $\dfrac{1}{1-\alpha}$
+\item bem sucedida é executada $\dfrac{1}{\alpha}\ln \dfrac{1}{1-\alpha}$
+\end{itemize}
+ \end{itemize}
+\end{frame}
+
+\section{Hashing na Prática: Tópicos Avançados}
+\subsection{Hashing Criptográfico e Segurança}
+\begin{frame}{Hash criptográfico vs. não criptográfico}
+  \begin{itemize}
+    \item As funções vistas até aqui (divisão, multiplicação) priorizam velocidade -- perfeitas para tabelas hash em memória, mas inadequadas quando um adversário escolhe as chaves.
+    \item Um hash \textbf{criptográfico} (ex.: SHA-256) acrescenta três garantias que o hash de tabela não precisa oferecer:
+    \begin{itemize}
+      \item resistência à pré-imagem: dado $h(x)$, é inviável achar $x$;
+      \item resistência à segunda pré-imagem: dado $x$, é inviável achar $y \ne x$ com $h(y)=h(x)$;
+      \item resistência a colisões: é inviável achar qualquer par $x \ne y$ com $h(x)=h(y)$.
+    \end{itemize}
+    \item Hashes não criptográficos (MurmurHash, xxHash, FNV) são muito mais rápidos, mas colidir propositalmente é trivial -- e é exatamente aí que mora o risco.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Ataques HashDoS e SipHash}
+  \begin{itemize}
+    \item Se um serviço web usa uma função hash previsível para indexar parâmetros recebidos (formulários, JSON), um atacante pode submeter milhares de chaves que colidem propositalmente.
+    \item Toda inserção degrada de $O(1)$ para $O(n)$: uma tabela hash inteira vira, na prática, uma lista encadeada -- o \textbf{HashDoS} (negação de serviço algorítmica), relatado publicamente em 2011 contra várias linguagens de script.
+    \item Mitigação adotada por Python (\texttt{dict}, desde 3.3), Rust e Ruby: usar \textbf{SipHash}, uma função pseudoaleatória rápida, com uma \emph{seed} de 128 bits sorteada aleatoriamente a cada execução do processo.
+    \begin{itemize}
+      \item Sem conhecer a seed, o atacante não consegue prever colisões.
+      \item É o mesmo princípio de projeto por trás do ASLR: aleatoriedade em tempo de execução neutraliza um ataque que dependeria de determinismo.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\subsection{Cuckoo Hashing e Robin Hood Hashing}
+\begin{frame}{Cuckoo hashing}
+  \begin{columns}[T]
+    \column{.55\textwidth}
+    \begin{itemize}
+      \item Usa duas tabelas (ou uma tabela com duas funções hash, $h_1$ e $h_2$).
+      \item Ao inserir $x$: se $T_1[h_1(x)]$ está livre, ocupa; senão, \textbf{expulsa} o ocupante atual e o realoja em $T_2[h_2(\cdot)]$ -- podendo expulsar outro elemento em cascata, como um filhote de cuco no ninho alheio.
+      \item Garante busca e remoção em $O(1)$ \textbf{no pior caso}: cada chave só pode estar em duas posições possíveis.
+      \item Ciclos de expulsão longos demais disparam um \emph{rehash} completo com novas funções.
+    \end{itemize}
+    \column{.4\textwidth}\centering\scriptsize
+    \begin{tikzpicture}[x=9mm,y=8mm]
+      \node[slot] (a) at (0,1) {$y$};
+      \node[slot] (b) at (0,0) {$x$};
+      \node[slot] (c) at (2,.5) {$y$};
+      \draw[redarrow] (a) -- node[above,font=\tiny]{expulso} (c);
+      \node[below=2mm of b,align=center] {$x$ ocupa\\ o lugar de $y$};
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Robin Hood hashing}
+  \begin{itemize}
+    \item Variante de endereçamento aberto (como a tentativa linear), mas com uma regra de troca justa.
+    \item Cada elemento guarda sua \textbf{distância até o endereço ideal} $h'(k)$ (quantas sondagens foram necessárias).
+    \item Ao inserir, se o elemento sendo colocado já percorreu mais distância que o ocupante atual da posição, eles trocam de lugar -- ``tira-se do rico (pouca distância) para dar ao pobre (muita distância)''.
+    \item Resultado: a variância das distâncias de sondagem cai bastante, tornando o pior caso muito mais previsível que na tentativa linear pura.
+    \item É a técnica por trás do \texttt{HashMap} padrão do Rust (implementação \emph{hashbrown}, inspirada nas SwissTables do Google), combinada com SipHash para resistir a HashDoS.
+  \end{itemize}
+\end{frame}
+
+\subsection{Consistent Hashing}
+\begin{frame}{Consistent hashing: motivação}
+  \begin{itemize}
+    \item No hashing tradicional, $h(k) = k \bmod m$: mudar $m$ (adicionar ou remover um servidor) remapeia \emph{quase todas} as chaves.
+    \item Em um sistema distribuído com $m$ servidores de cache ou de armazenamento, isso significa invalidar quase tudo a cada mudança de cluster -- inviável em produção.
+    \item \textbf{Consistent hashing} mapeia servidores \emph{e} chaves no mesmo espaço circular $[0, 2^{k}-1]$ (o ``anel'').
+    \item Cada chave pertence ao primeiro servidor encontrado ao percorrer o anel no sentido horário.
+  \end{itemize}
+  \centering\small
+  \begin{tikzpicture}[scale=.62]
+    \draw[thick] (0,0) circle (1.3);
+    \foreach \a/\lab in {30/{$S_1$},150/{$S_2$},260/{$S_3$}}{
+      \node[slot,minimum width=6mm,minimum height=5mm,fill=hblockbg] at (\a:1.3) {\lab};
+    }
+    \foreach \a/\lab in {70/{$k_1$},190/{$k_2$},320/{$k_3$}}{
+      \node[font=\tiny] at (\a:1.3) {$\bullet$};
+      \node[font=\tiny] at (\a-8:1.65) {\lab};
+    }
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Nós virtuais e uso em produção}
+  \begin{itemize}
+    \item Remover ou adicionar um servidor remapeia só as chaves entre ele e o próximo nó do anel -- em média, $\frac{1}{m}$ das chaves, não todas.
+    \item Problema prático: poucos servidores reais distribuem o anel de forma desigual. Solução: cada servidor físico recebe várias posições virtuais (\emph{virtual nodes}) espalhadas no anel, equilibrando a carga.
+    \item Usado, entre outros, por:
+    \begin{itemize}
+      \item Amazon DynamoDB e Apache Cassandra, para particionar dados entre nós;
+      \item redes de CDN e Memcached distribuído, para decidir qual servidor de cache atende cada chave.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\subsection{Bloom Filters}
+\begin{frame}{Bloom filters}
+  \small
+  \begin{columns}[T]
+    \column{.57\textwidth}
+    \begin{itemize}
+      \item Estrutura probabilística para testar pertencimento a um conjunto, com muito menos memória que guardar os elementos.
+      \item Um vetor de $m$ bits (zerado) e $k$ funções hash independentes.
+      \item \textbf{Inserir} $x$: liga os bits $h_1(x),\ldots,h_k(x)$.
+      \item \textbf{Consultar} $x$: algum bit em 0 $\Rightarrow$ $x$ certamente \emph{não} está; todos em 1 $\Rightarrow$ $x$ \emph{provavelmente} está.
+    \end{itemize}
+    \column{.4\textwidth}\centering\scriptsize
+    \begin{tikzpicture}[x=5.6mm,y=5.6mm]
+      \foreach \v/\i in {0/0,1/1,0/2,1/3,1/4,0/5,1/6,0/7}{
+        \ifnum\v=1 \node[cellG] at (\i,0) {1}; \else \node[cellW] at (\i,0) {0}; \fi
+      }
+    \end{tikzpicture}
+  \end{columns}
+  \medskip
+  \begin{itemize}
+    \item Nunca há falso negativo, mas pode haver \textbf{falso positivo} quando bits de elementos diferentes se sobrepõem.
+    \item Taxa de falso positivo aproximada: $\left(1-e^{-kn/m}\right)^{k}$, para $n$ elementos inseridos.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bloom filters: aplicações}
+  \begin{itemize}
+    \item \textbf{Bancos de dados} (Cassandra, HBase, RocksDB): antes de ler um arquivo em disco, consultam um Bloom filter em memória para saber se a chave \emph{pode} estar ali -- evitam leituras caras que dariam em vazio.
+    \item \textbf{Navegadores}: listas de URLs maliciosas (Google Safe Browsing) usam Bloom filters para checar localmente, sem baixar a lista inteira.
+    \item \textbf{Sistemas distribuídos e CDNs}: deduplicação e checagem rápida de cache antes de uma requisição de rede.
+    \item O trade-off é sempre o mesmo: trocar uma pequena taxa de falsos positivos por uma economia enorme de memória e tempo.
+  \end{itemize}
+\end{frame}
+
+% =============================================================================
+\section{Conclusões}
+\begin{frame}{Conclusões}
+  \begin{itemize}
+    \item Tabelas hash trocam a ordenação por um mapeamento direto chave $\to$ endereço, buscando $\Theta(1)$ em média.
+    \item Colisões são inevitáveis; encadeamento e endereçamento aberto (linear, quadrático, hash duplo) resolvem-nas com trade-offs distintos de memória e agrupamento.
+    \item O fator de carga $\alpha$ governa o desempenho em qualquer uma dessas estratégias.
+    \item Técnicas modernas -- cuckoo/Robin Hood hashing, consistent hashing, Bloom filters, SipHash -- adaptam a mesma ideia central a garantias de pior caso, escala distribuída e segurança.
+  \end{itemize}
+\end{frame}
+
+
+% \begin{frame}[fragile]{One-Way ANOVA  - Exemplo Prático}
+%          \centering\footnotesize\begin{lstlisting}[language=R]
+% Y <- c(rnorm(10,21,1),rnorm(10,17,2),rnorm(10,15,2)) 
+% X <- rep(c("T1","T2","T3"),each=10) 
+% dados <- data.frame(Y,X)
+% summary(lm(Y ~ X))
+%             \end{lstlisting}
+%      \begin{itemize}
+%          \item Resultado: 
+%         \begin{figure}[!h]
+%             \centering
+%             \includegraphics[scale=0.25]{figs/logo.eps}
+%             \label{fig:anovaResult}
+%         \end{figure}
+%      \end{itemize}
+% 
+% \end{frame} 
+
+
+\section{Referências Bibliográficas}
+\begin{frame}[t,allowframebreaks]
+\frametitle{Referências}
+%\bibliographystyle{amsalpha}
+%\bibliography{bibfile}
+\begin{thebibliography}{*}
+
+        \bibitem[A01]{A01} Lee K.D., Hubbard S. (2015) Trees. In: Data Structures and Algorithms with Python. Undergraduate Topics in Computer Science. Springer, Cham. Retrieved from \url{https://doi.org/10.1007/978-3-319-13072-9_6}
+        
+        \bibitem[A02]{A02}Hubbard, J. (2007). Schaum’s Outline sof Data Structures with Java. Retrieved from \url{http://www.amazon.com/Schaums-Outline-Data-Structures-Java/dp/0071476989}
+        
+        \bibitem[A03]{A03} Cormen, T. H., Leiserson, C. E., \& Stein, R. L. R. E. C. (2012). Algoritmos: teoria e prática. Retrieved from \url{https://books.google.com.br/books?id=6iA4LgEACAAJ}.
+        
+        \bibitem[A04]{A04} Ascenio, Ana Fernanda Gomes. Estrutura de dados: Algoritmos, análise da complexidade e implementações em Java e C++. São Paulo: Pearson Prentice Hall, 2010.
+        
+        \bibitem[A05]{A05} Donald E. Knuth. Sorting and Searching, volume 3 of The Art ofComputer Programming. Addison-Wesley, 1973. Second edition, 1998
+        
+        \bibitem[A06]{A06} Szwarcfiter, Jayme Luiz. Estruturas de dados e seus algoritmos / Jayme Luiz Szwarcfiter, Lilian Markenzon. 3.ed. [Reimpr.]. - Rio de Janeiro : LTC, 2015.
+        
+\end{thebibliography}
+\end{frame}
+\section{}
+
+%remover logo
+\setbeamertemplate{logo}{}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\end{document}
