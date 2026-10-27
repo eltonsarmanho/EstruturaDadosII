@@ -1,0 +1,1748 @@
+\documentclass[xcolor=table]{beamer}
+% ===========================================================================
+% Aula 3 - Grafos (Estrutura de Dados II)
+% Fonte reconstruída a partir de Aulas/Aula 3/Graph.pdf
+% Tema: Montpellier + colortheme lsc (arquivos .sty nesta mesma pasta)
+% ===========================================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english,brazil]{babel}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{caption}
+\usepackage{transparent}
+\usepackage{fontawesome5}
+\usepackage{ccicons}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit}
+
+\setbeamerfont{headline}{size=\footnotesize}
+% Corpo dos slides em 9pt, como no PDF original
+\setbeamerfont{normal text}{size=\footnotesize}
+\AtBeginDocument{\usebeamerfont{normal text}}
+\setbeamerfont{author}{size=\normalsize}
+\setbeamerfont{date}{size=\normalsize}
+\setbeamerfont{institute}{size=\footnotesize}
+
+\mode<presentation>{
+  \usetheme{Montpellier}
+  \setbeamercovered{transparent}
+  \usecolortheme{lsc}
+}
+
+\mode<handout>{
+  % tema simples para ser impresso
+  \usepackage[bar]{beamerthemetree}
+  \beamertemplatesolidbackgroundcolor{black!5}
+}
+
+% Estilos TikZ (vértices cinza do material original)
+% ---------------------------------------------------------------------------
+\tikzset{
+  v/.style={circle,fill=gray!45,inner sep=0pt,minimum size=5.5mm,font=\scriptsize},
+  vs/.style={circle,fill=gray!45,inner sep=0pt,minimum size=4mm,font=\tiny},
+  dot/.style={circle,fill=black,inner sep=0pt,minimum size=4pt},
+  ring/.style={circle,draw=blue!60!black,fill=white,inner sep=0pt,minimum size=4.5mm,font=\scriptsize},
+  arc/.style={-{Stealth[length=2mm]}},
+  lbl/.style={font=\scriptsize},
+}
+
+% ---------------------------------------------------------------------------
+% Macros de figuras reutilizadas em mais de um slide
+% ---------------------------------------------------------------------------
+
+% Grafo a-b-c-d (+ vértice isolado e), usado nos slides de grau.
+\newcommand{\GrafoGrau}{%
+\begin{tikzpicture}[x=1.2cm,y=1.2cm]
+  \node[v] (a) at (0,1) {a};
+  \node[v] (b) at (1.2,1) {b};
+  \node[v] (c) at (0,0) {c};
+  \node[v] (d) at (1.2,0) {d};
+  \node[v] (e) at (2.2,.5) {e};
+  \draw (a)--(b) (a)--(c) (a)--(d) (b)--(d) (c)--(d);
+\end{tikzpicture}}
+
+% Grafo 1..5 dos slides de caminho, trajeto e ciclo.
+% O argumento recebe estilos opcionais para destacar arestas, por exemplo:
+% \GrafoPasseio{e12/.style={red,thick}, e23/.style={red,thick}}
+\newcommand{\GrafoPasseio}[1]{%
+\begin{tikzpicture}[x=1.15cm,y=1.15cm,
+    e12/.style={},e23/.style={},e34/.style={},e24/.style={black!35},
+    e15/.style={},e54/.style={},#1]
+  \node[v] (1) at (0,1.2) {1};
+  \node[v] (2) at (1.6,1.2) {2};
+  \node[v] (3) at (2.5,.2) {3};
+  \node[v] (4) at (1.6,-.9) {4};
+  \node[v] (5) at (-.9,.2) {5};
+  \draw[e12] (1)--(2);
+  \draw[e23] (2)--(3);
+  \draw[e34] (3)--(4);
+  \draw[e24] (2)--(4);
+  \draw[e15] (1)--(5);
+  \draw[e54] (5)--(4);
+\end{tikzpicture}}
+
+% Grafo 0..4 dos exemplos de matriz e lista de adjacências.
+\newcommand{\GrafoRepresentacao}{%
+\begin{tikzpicture}[x=1cm,y=1cm,every node/.style={v,minimum size=6.5mm,font=\small}]
+  \node (0) at (.6,2.1) {0};
+  \node (1) at (2,1.3) {1};
+  \node (2) at (1.6,0) {2};
+  \node (3) at (.1,0) {3};
+  \node (4) at (-.6,.8) {4};
+  \draw (0)--(1) (0)--(4) (1)--(2) (1)--(3) (1)--(4) (2)--(3) (3)--(4);
+\end{tikzpicture}}
+
+% Dígrafo ponderado do Dijkstra passo a passo.
+% O argumento sobrescreve estilos de vértices (n0..n4) e arestas (eXY):
+%   dS = vértice já em S, dU = distância atualizada neste passo,
+%   dR = aresta relaxada neste passo.
+\newcommand{\DijkstraGrafo}[1]{%
+\begin{tikzpicture}[x=.9cm,y=.9cm,font=\normalsize,
+    dv/.style={circle,fill=gray!45,inner sep=0pt,minimum size=8mm},
+    dS/.style={fill=gray!20},
+    dU/.style={fill=gray!65},
+    de/.style={-{Stealth[length=2mm]}},
+    dR/.style={draw=red,thick},
+    n0/.style={},n1/.style={},n2/.style={},n3/.style={},n4/.style={},
+    e01/.style={},e03/.style={},e04/.style={},e12/.style={},
+    e24/.style={},e32/.style={},e34/.style={},
+    #1]
+  \node[dv,n0] (0) at (0,1.7) {0};
+  \node[dv,n1] (1) at (-1.6,.6) {1};
+  \node[dv,n4] (4) at (1.6,.6) {4};
+  \node[dv,n2] (2) at (-1,-1.3) {2};
+  \node[dv,n3] (3) at (1,-1.3) {3};
+  \draw[de,e01] (0) -- node[above left]{1} (1);
+  \draw[de,e04] (0) -- node[above right]{10} (4);
+  \draw[de,e03] (0) -- node[pos=.22,right]{3} (3);
+  \draw[de,e12] (1) -- node[left]{5} (2);
+  \draw[de,e32] (3) -- node[below]{2} (2);
+  \draw[de,e24] (2) -- node[pos=.2,above left]{1} (4);
+  \draw[de,e34] (3) -- node[right]{6} (4);
+\end{tikzpicture}}
+
+% ---------------------------------------------------------------------------
+% Título, autor e logo
+% ---------------------------------------------------------------------------
+\beamertemplatetransparentcovereddynamic
+\addtobeamertemplate{title page}{\centering{\includegraphics[width=1.25cm]{figs/logo.png}}}{}
+\title[Estrutura de Dados II]{Grafos}
+\author[Elton Sarmanho]{
+  Professor: Elton Sarmanho\inst{1}\newline
+  E-mail: \href{mailto:eltonss@ufpa.br}{eltonss@ufpa.br}\newline
+  \href{https://github.com/eltonsarmanho}{\faGithub}
+  \href{https://www.linkedin.com/in/elton-sarmanho-836553185/}{\faLinkedin}\newline
+  \ccbyncsa
+}
+\institute[UFPA]{\inst{1}Faculdade de Sistemas de Informação - UFPA/CUTINS}
+\date{\today}
+
+\pgfdeclareimage[height=1.25cm]{inf}{figs/logo.png}
+\logo{{\transparent{0.35}\pgfuseimage{inf}}}
+
+\setbeamertemplate{navigation symbols}{\insertframenavigationsymbol \insertsectionnavigationsymbol \insertbackfindforwardnavigationsymbol}
+
+% Número do slide ao lado do título curto no cabeçalho
+\expandafter\def\expandafter\insertshorttitle\expandafter{%
+  \insertshorttitle\hfill%
+  \insertframenumber\,/\,\inserttotalframenumber}
+
+\begin{document}
+
+\setbeamertemplate{logo}{}
+\begin{frame}
+  \titlepage
+\end{frame}
+% Começar a mostrar o logo após o slide de título
+\logo{{\transparent{0.35}\pgfuseimage{inf}}}
+
+\begin{frame}{Roteiro}
+  \tableofcontents[sections={1-2}]
+\end{frame}
+
+\begin{frame}{Roteiro}
+  \tableofcontents[sections={3-4}]
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Grafos}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Objetivos}
+\begin{frame}{Objetivos de Aprendizagem}
+  \begin{block}{Ao final desta aula, você será capaz de:}
+    \footnotesize
+    \begin{itemize}
+      \item \textbf{Conceituar} o que é um grafo e identificar seus componentes fundamentais (vértices e arestas).
+      \item \textbf{Diferenciar} os principais tipos de grafos e suas terminologias (simples, dígrafo, ponderado, etc.).
+      \item \textbf{Modelar} problemas do mundo real utilizando a estrutura de grafos.
+      \item \textbf{Implementar} as três principais representações computacionais de um grafo: Matriz de Adjacências, Lista de Adjacências e Matriz de Incidência.
+      \item \textbf{Analisar} as vantagens e desvantagens de cada representação, sabendo escolher a mais adequada para cada cenário.
+      \item \textbf{Aplicar} algoritmos de travessia fundamentais: Busca em Largura (BFS) e Busca em Profundidade (DFS).
+      \item \textbf{Resolver} o problema do caminho mínimo com o Algoritmo de Dijkstra.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\subsection{Introdução}
+\begin{frame}{Grafos Estão em Todo Lugar!}
+  \footnotesize
+  \vspace{-.8em}
+  \begin{itemize}
+    \item Pense em grafos como uma forma de representar \textbf{conexões}. Quase tudo no mundo pode ser visto como um conjunto de ``coisas'' e das relações entre elas.
+  \end{itemize}
+  \begin{block}{Exemplos do Mundo Real}
+    \begin{itemize}
+      \item \textbf{Redes Sociais:} você e seus amigos são os ``pontos'' (vértices), e as amizades são as ``linhas'' (arestas) que os conectam.
+      \item \textbf{Mapas e GPS:} cidades são vértices e as estradas entre elas são arestas. O GPS usa algoritmos em grafos para encontrar o caminho mais rápido!
+      \item \textbf{A Internet:} páginas da web são vértices, e os links de uma página para outra são as arestas.
+      \item \textbf{Logística e Transportes:} aeroportos são vértices, e os voos diretos são arestas. Como uma empresa aérea otimiza suas rotas? Com grafos.
+    \end{itemize}
+  \end{block}
+  \begin{itemize}
+    \item A Teoria dos Grafos nos dá a linguagem e as ferramentas para analisar e resolver esses problemas de conexão de forma estruturada.
+  \end{itemize}
+\end{frame}
+
+\subsection{Conceitos Fundamentais}
+\begin{frame}{A Definição Formal de um Grafo}
+  \begin{itemize}
+    \item Formalmente, um grafo $\mathbf{G}$ é um par ordenado $\mathbf{G} = (V,E)$, onde:
+    \begin{itemize}
+      \item $\mathbf{V}$ é um conjunto de \textbf{Vértices} (ou nós). São os ``pontos'' ou as ``entidades'' do nosso modelo.
+      \item $\mathbf{E}$ é um conjunto de \textbf{Arestas} (ou arcos). São as ``linhas'' que conectam pares de vértices e representam a relação entre eles.
+    \end{itemize}
+    \vspace{1em}
+    \item Uma aresta $\mathbf{e} \in E$ que conecta os vértices $u$ e $v$ é representada como um par: $\mathbf{e} = (u,v)$.
+    \begin{itemize}
+      \item Dizemos que os vértices $u$ e $v$ são \textbf{adjacentes} (ou vizinhos).
+      \item A aresta $(u,v)$ é \textbf{incidente} aos vértices $u$ e $v$.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Representação de um Grafo}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \footnotesize
+    \begin{block}{}
+      \begin{description}
+        \item[Vértices] $1,2,3,4,5$
+        \item[Arestas] (1,2),(1,5),(5,2),(5,4), (2,4),(2,3),(4,3)
+        \item[Tamanho $|V|$] Número de elementos em $G$
+        \item[$|E|$] Número de arestas em $G$
+      \end{description}
+    \end{block}
+    \column{0.5\linewidth}
+    \centering
+    % Figura original: figs/representacaoGrafo.png
+    \begin{tikzpicture}[x=1cm,y=1cm,every node/.style={v,minimum size=6mm}]
+      \node (1) at (-.4,1.3) {1};
+      \node (2) at (1.4,1.9) {2};
+      \node (3) at (2.7,1.1) {3};
+      \node (4) at (2.1,-.3) {4};
+      \node (5) at (.4,-.3) {5};
+      \draw (1)--(2) (1)--(5) (5)--(2) (5)--(4) (2)--(4) (2)--(3) (4)--(3);
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Tipos Especiais de Arestas e Grafos}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \begin{block}{Laços e Arestas Paralelas}
+      \begin{itemize}
+        \item \textbf{Laço (Loop):} uma aresta que conecta um vértice a si mesmo, ex: $(v,v)$.
+        \item \textbf{Arestas Paralelas (ou Múltiplas):} quando existe mais de uma aresta conectando o mesmo par de vértices.
+      \end{itemize}
+    \end{block}
+    \column{0.45\linewidth}
+    \centering
+    % Figura original: figs/laco.png
+    \begin{tikzpicture}[x=1.4cm,y=1.4cm]
+      \node[v] (1) at (0,1) {1};
+      \node[v] (2) at (1,1) {2};
+      \node[v] (3) at (1,0) {3};
+      \node[v] (4) at (0,0) {4};
+      \draw (1)--(2) (1)--(4) (2)--(3) (4)--(3);
+      \draw (4) to[bend left=25] (2);
+      \draw (4) to[bend right=25] (2);
+      \draw[->] (1) to[out=120,in=60,looseness=8] (1);
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Tipos Especiais de Arestas e Grafos}
+  \begin{block}{Classificações Importantes}
+    \begin{itemize}
+      \item \textbf{Multigrafo:} um grafo que pode conter laços e/ou arestas paralelas.
+      \item \textbf{Grafo Simples:} um grafo que \textbf{não} possui laços nem arestas paralelas. \textit{(Este é o tipo mais comum que estudaremos!)}
+      \item \textbf{Grafo Trivial:} um grafo com apenas um vértice e nenhuma aresta.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\subsection{Terminologia}
+\begin{frame}{Subgrafo}
+  \begin{block}{Definição}
+    Um grafo $G' = (V',E')$ é um \textbf{subgrafo} de $G = (V,E)$ se, e somente se, $V' \subseteq V$ e $E' \subseteq E$.
+  \end{block}
+  \begin{itemize}
+    \item Em outras palavras, um subgrafo é formado quando tomamos um ``pedaço'' dos vértices e das arestas do grafo original.
+    \item \textbf{Exemplo prático:} a rede de amizades dos alunos de uma única turma é um subgrafo da rede de amizades de toda a universidade.
+  \end{itemize}
+  \centering
+  \begin{tikzpicture}[x=1.35cm,y=1.2cm,vs/.append style={minimum size=5mm}]
+    \node[font=\tiny\bfseries] at (.5,1.65) {Grafo G};
+    \node[vs] (a) at (0,1) {a};
+    \node[vs] (b) at (1,1) {b};
+    \node[vs] (c) at (0,0) {c};
+    \node[vs] (d) at (1,0) {d};
+    \draw (a)--(b) (a)--(c) (a)--(d) (b)--(d) (c)--(d);
+    \begin{scope}[xshift=3.3cm]
+      \node[font=\tiny\bfseries] at (.5,1.65) {Subgrafo G'};
+      \node[vs] (a2) at (0,1) {a};
+      \node[vs] (c2) at (0,0) {c};
+      \node[vs] (d2) at (1,0) {d};
+      \draw[red!80!black] (a2)--(d2) (c2)--(d2);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Subgrafo}
+  \begin{columns}
+    \column{0.55\linewidth}
+    \begin{block}{}
+      \begin{description}
+        \item[G] $V = a,b,c,d$\\$E = \{ab, ac, ad, bd, cd\}$
+        \item[$G_1$] $V_1 = a,b,d$\\$E_1 = \{ad, bd\}$
+        \item[$G_2$] $V_2 = a,b,c,d$\\$E_2 = \{ab, ac, cd\}$
+      \end{description}
+    \end{block}
+    \column{0.45\linewidth}
+    \centering
+    % Figura original: figs/representacaosubGrafo.png
+    \begin{tikzpicture}[x=.55cm,y=.55cm,every node/.style={font=\scriptsize\itshape}]
+      \node at (.5,1.75) {G};
+      \node[dot,label={[font=\tiny\itshape]left:a}] (a) at (0,1) {};
+      \node[dot,label={[font=\tiny\itshape]right:b}] (b) at (1,1) {};
+      \node[dot,label={[font=\tiny\itshape]left:c}] (c) at (0,0) {};
+      \node[dot,label={[font=\tiny\itshape]right:d}] (d) at (1,0) {};
+      \draw[thick] (a)--(b) (a)--(c) (a)--(d) (b)--(d) (c)--(d);
+      \begin{scope}[xshift=1.45cm]
+        \node at (.5,1.75) {$G_1$};
+        \node[dot,label={[font=\tiny\itshape]left:a}] (a1) at (0,1) {};
+        \node[dot,label={[font=\tiny\itshape]right:b}] (b1) at (1,1) {};
+        \node[dot,label={[font=\tiny\itshape]right:d}] (d1) at (1,0) {};
+        \draw[thick] (a1)--(d1) (b1)--(d1);
+      \end{scope}
+      \begin{scope}[xshift=2.9cm]
+        \node at (.5,1.75) {$G_2$};
+        \node[dot,label={[font=\tiny\itshape]left:a}] (a2) at (0,1) {};
+        \node[dot,label={[font=\tiny\itshape]right:b}] (b2) at (1,1) {};
+        \node[dot,label={[font=\tiny\itshape]left:c}] (c2) at (0,0) {};
+        \node[dot,label={[font=\tiny\itshape]right:d}] (d2) at (1,0) {};
+        \draw[thick] (a2)--(b2) (a2)--(c2) (c2)--(d2);
+      \end{scope}
+    \end{tikzpicture}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Grau de um Vértice}
+  \begin{itemize}
+    \item O \textbf{Grau} (ou valência) de um vértice $v$, denotado por $deg(v)$, é o número de arestas incidentes a ele. Em grafos com laços, cada laço conta 2 no grau.
+  \end{itemize}
+  \vspace{1em}
+  \begin{columns}
+    \column{0.45\linewidth}
+    \centering
+    \GrafoGrau
+    \column{0.5\linewidth}
+    \begin{block}{Exemplos de Grau}
+      \begin{itemize}
+        \item $deg(a) = 3$
+        \item $deg(b) = 2$
+        \item $deg(d) = 3$
+        \item $deg(e) = 0$
+      \end{itemize}
+    \end{block}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Grau de um Vértice}
+  \begin{itemize}
+    \item O \textbf{Grau} (ou valência) de um vértice $v$, denotado por $deg(v)$, é o número de arestas incidentes a ele. Em grafos com laços, cada laço conta 2 no grau.
+  \end{itemize}
+  \begin{columns}
+    \column{0.45\linewidth}
+    \centering
+    \GrafoGrau
+    \column{0.5\linewidth}
+    \begin{alertblock}{Terminologia}
+      \begin{itemize}
+        \item \textbf{Vértice Isolado:} um vértice com grau 0.
+        \item \textbf{Vértice Folha (ou Terminal):} um vértice com grau 1.
+      \end{itemize}
+    \end{alertblock}
+  \end{columns}
+  \begin{theorem}[Handshaking Lemma]
+    A soma dos graus de todos os vértices de um grafo é igual a duas vezes o número de arestas: $\sum_{v \in V} deg(v) = 2|E|$.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}{Grafos Regulares e Completos}
+  \begin{columns}[T]
+    \column{0.48\linewidth}
+    \begin{block}{Grafo Regular}
+      \centering
+      Um grafo é \textbf{k-regular} se todos os seus vértices possuem grau $k$.\par
+      \vspace{.4em}
+      % Figura original: figs/GrafoRegular.png
+      \begin{tikzpicture}[x=1cm,y=1cm]
+        \node[vs] (v1) at (90:.95) {$v_1$};
+        \node[vs] (v2) at (210:.95) {$v_2$};
+        \node[vs] (v3) at (330:.95) {$v_3$};
+        \draw (v1)--(v2)--(v3)--(v1);
+      \end{tikzpicture}\par
+      {\tiny Grafo 2-Regular}
+    \end{block}
+    \column{0.48\linewidth}
+    \begin{block}{Grafo Completo ($K_n$)}
+      \centering
+      Um grafo simples é \textbf{completo} se todo par de vértices distintos é conectado por uma aresta. O grafo completo com $n$ vértices é denotado por $K_n$.\par
+      \vspace{.3em}
+      % Figura original: figs/GrafoCompleto.png
+      \begin{tikzpicture}[x=1cm,y=1cm]
+        \foreach \i/\a in {1/90,5/18,4/-54,3/-126,2/162}
+          \node[vs] (k\i) at (\a:.85) {$v_\i$};
+        \foreach \i [evaluate=\i as \inext using int(\i+1)] in {1,...,4}
+          \foreach \j in {\inext,...,5}
+            \draw (k\i)--(k\j);
+      \end{tikzpicture}\par
+      {\tiny Grafo Completo $K_5$}
+    \end{block}
+  \end{columns}
+  \begin{theorem}
+    O número de arestas em um grafo completo $K_n$ é $|E| = \frac{n(n-1)}{2}$.
+  \end{theorem}
+\end{frame}
+
+\begin{frame}{Grafo Bipartido}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Um grafo $G = (V,E)$ é dito bipartido quando $\mathbf{V}$ pode ser particionado em dois subconjuntos $V_1$ e $V_2$ de modo que toda aresta de $G$ liga um vértice de $V_1$ a um vértice de $V_2$
+    \end{itemize}
+    $$G(V_1 \cup V_2, E)$$
+  \end{block}
+  \centering
+  \begin{tikzpicture}[x=1cm,y=.85cm,
+      u/.style={circle,fill=blue!30,inner sep=0pt,minimum size=5.5mm,font=\scriptsize},
+      w/.style={circle,fill=red!30,inner sep=0pt,minimum size=5.5mm,font=\scriptsize}]
+    \node[u] (u1) at (0,2) {$u_1$};
+    \node[u] (u2) at (0,.9) {$u_2$};
+    \node[u] (u3) at (0,-.2) {$u_3$};
+    \node[w] (v1) at (2.2,1.6) {$v_1$};
+    \node[w] (v2) at (2.2,.3) {$v_2$};
+    \node[left=1pt of u2,font=\scriptsize] {$V_1$};
+    \node[font=\scriptsize] at (3.3,.9) {$V_2$};
+    \draw (u1)--(v1) (u2)--(v1) (u2)--(v2) (u3)--(v2);
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Grafo Bipartido Completo}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Um grafo $G = (V_1 \cup V_2, E)$ é dito bipartido completo quando existe uma aresta para todo par de vértices $u,v$ com $u \in V_1$ e $v \in V_2$
+      \item $K_{m,n}$
+      \begin{itemize}
+        \item $m=|V_1|$
+        \item $n=|V_2|$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    % Figura original: figs/GrafoBipartido.png
+    \begin{tikzpicture}[x=.8cm,y=.8cm,every node/.style={font=\tiny}]
+      \node at (1.5,1.5) {(a) Grafo bipartido};
+      \foreach \i/\x/\y in {1/0/0,2/.9/1,3/1.8/0,4/2.7/1,5/3.6/0}
+        \node[dot] (a\i) at (\x,\y) {};
+      \draw (a1)--(a2)--(a3)--(a4)--(a5);
+      \node at (1.8,-.45) {(a)};
+      \begin{scope}[xshift=4.4cm]
+        \node at (1.5,1.5) {(b) Grafo bipartido completo};
+        \node[dot] (t1) at (.9,1) {};
+        \node[dot] (t2) at (2.7,1) {};
+        \foreach \i/\x in {1/0,2/1.8,3/3.6} {
+          \node[dot] (b\i) at (\x,0) {};
+          \draw (t1)--(b\i) (t2)--(b\i);
+        }
+        \node at (1.8,-.45) {(b) $K_{2,3}$};
+      \end{scope}
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Caminhos e Ciclos}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Dado $G=(V,E)$, uma sequência de vértices $v_1,v_2,\dots,v_j$, tal que $(v_i,v_{i+1}) \in E$ para $1\leq i \leq j-1$, recebe o nome de \textbf{caminho} de $v_1$ a $v_j$
+      \begin{description}
+        \item[Comprimento] Número de arestas do caminho
+        \item[Caminho simples] Todos os vértices são distintos
+        \item[Trajeto] Todas as arestas são distintas
+      \end{description}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\subsection{Caminhos e Conectividade}
+\begin{frame}{Caminhos, Trajetos e Ciclos (Parte 1)}
+  \begin{block}{Definições Iniciais: Como ``Andar'' no Grafo}
+    \begin{itemize}
+      \item \textbf{Caminho (Walk):} a forma mais geral de travessia. É uma sequência de vértices em que cada par consecutivo está conectado por uma aresta. \textbf{Vértices e arestas podem ser repetidos}. \textbf{Exemplo de Caminho (vértice 2 repetido):} $1 \rightarrow 2 \rightarrow 3 \rightarrow 4 \rightarrow 2$
+    \end{itemize}
+  \end{block}
+  \centering
+  \GrafoPasseio{}
+\end{frame}
+
+\begin{frame}{Caminhos, Trajetos e Ciclos (Parte 1)}
+  \begin{block}{Definições Iniciais: Como ``Andar'' no Grafo}
+    \begin{itemize}
+      \item \textbf{Trajeto (Trail):} um tipo especial de caminho em que as \textbf{arestas não se repetem}. Os vértices, por outro lado, ainda podem ser visitados mais de uma vez. \textbf{Exemplo de Trajeto (vértice 2 repetido):} $1 \rightarrow 5 \rightarrow 4 \rightarrow 2 \rightarrow 3$
+    \end{itemize}
+  \end{block}
+  \centering
+  \GrafoPasseio{}
+\end{frame}
+
+\begin{frame}{Caminhos, Trajetos e Ciclos (Parte 2)}
+  \begin{block}{Definições Fundamentais: As Travessias Mais Úteis}
+    \begin{itemize}
+      \item \textbf{Caminho Simples (Path):} o conceito mais importante de ``caminho''. É um trajeto em que os \textbf{vértices não se repetem} (com exceção, talvez, do início e do fim). Ex: \textbf{Caminho Simples de 1 a 3:} $1 \rightarrow 2 \rightarrow 3$
+    \end{itemize}
+  \end{block}
+  \centering
+  \GrafoPasseio{}
+\end{frame}
+
+\begin{frame}{Caminhos, Trajetos e Ciclos (Parte 2)}
+  \begin{block}{Definições Fundamentais: As Travessias Mais Úteis}
+    \begin{itemize}
+      \item \textbf{Ciclo (Cycle):} um caminho simples de comprimento 3 ou mais que \textbf{começa e termina no mesmo vértice}. Ciclos são estruturas cruciais na análise de grafos. Ex: \textbf{Ciclo:} $2 \rightarrow 3 \rightarrow 4 \rightarrow 2$
+    \end{itemize}
+  \end{block}
+  \centering
+  \GrafoPasseio{}
+\end{frame}
+
+\begin{frame}{Conectividade}
+  \begin{block}{Grafo Conexo}
+    Um grafo (não-direcionado) é \textbf{conexo} se existe um caminho entre todo par de vértices distintos.
+  \end{block}
+  \begin{itemize}
+    \item Se um grafo não é conexo, ele é chamado de \textbf{desconexo}.
+    \item Um grafo desconexo é composto por duas ou mais \textbf{componentes conexas}.
+    \item \textbf{Analogia:} pense no mapa de um país com ilhas desconectadas. Cada ilha, com suas cidades e estradas, é uma componente conexa.
+  \end{itemize}
+  \centering
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \node[vs] (2) at (0,.6) {2};
+    \node[vs] (1) at (-.6,0) {1};
+    \node[vs] (3) at (.6,0) {3};
+    \node[vs] (4) at (0,-.6) {4};
+    \draw (1)--(2)--(3)--(4)--(1);
+    \draw[dashed,gray] (0,0) ellipse (1cm and 1.25cm);
+    \begin{scope}[xshift=3cm]
+      \node[vs] (5) at (0,.35) {5};
+      \node[vs] (7) at (-.6,-.4) {7};
+      \node[vs] (6) at (.6,-.4) {6};
+      \draw (7)--(5)--(6);
+      \draw[dashed,gray] (0,-.05) circle (1.05cm);
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Grafo Conexo}
+  \centering
+  % Figura original: figs/grafoConexo.png
+  \begin{tikzpicture}[x=1.5cm,y=1.5cm,every node/.style={font=\normalsize}]
+    \node at (1,1.9) {(a) Grafo conexo};
+    \node[dot,minimum size=6pt] (A) at (0,1.2) {};
+    \node[dot,minimum size=6pt] (B) at (2,1.2) {};
+    \node[dot,minimum size=6pt] (C) at (1.2,.7) {};
+    \node[dot,minimum size=6pt] (D) at (0,0) {};
+    \node[dot,minimum size=6pt] (E) at (1.2,0) {};
+    \node[dot,minimum size=6pt] (F) at (2,0) {};
+    \draw[thick] (A)--(B) (A)--(C) (B)--(C) (C)--(D) (C)--(E) (B)--(F);
+    \node at (1,-.6) {(a)};
+    \begin{scope}[xshift=4.6cm]
+      \node at (1,1.9) {(b) Grafo desconexo};
+      \node[dot,minimum size=6pt] (P) at (0,1.2) {};
+      \node[dot,minimum size=6pt] (Q) at (2,1.2) {};
+      \node[dot,minimum size=6pt] (R) at (1.2,.7) {};
+      \node[dot,minimum size=6pt] (S) at (0,0) {};
+      \node[dot,minimum size=6pt] (T) at (1.2,0) {};
+      \node[dot,minimum size=6pt] (U) at (2,-.1) {};
+      \draw[thick] (P)--(Q) (R)--(S) (R)--(T);
+      \node at (1,-.6) {(b)};
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\subsection{Grafos Direcionados e Ponderados}
+\begin{frame}{Grafos Direcionados (Dígrafos)}
+  \begin{itemize}
+    \item Em um \textbf{Dígrafo}, as arestas (chamadas de \textbf{arcos}) têm uma direção. A aresta $(u,v)$ indica que há uma conexão de $u$ para $v$, mas não necessariamente de $v$ para $u$.
+    \item \textbf{Analogia:} ruas de mão única.
+    \item \textbf{Terminologia Adicional:}
+    \begin{itemize}
+      \item \textbf{Grau de Entrada (in-degree):} número de arcos que chegam a um vértice.
+      \item \textbf{Grau de Saída (out-degree):} número de arcos que partem de um vértice.
+    \end{itemize}
+  \end{itemize}
+  \centering
+  \begin{tikzpicture}[x=1cm,y=1cm]
+    \node[v] (1) at (0,0) {1};
+    \node[v] (2) at (1.3,0) {2};
+    \node[v] (3) at (1.3,-1.3) {3};
+    \draw[arc] (1)--(2);
+    \draw[arc] (2)--(3);
+    \draw[arc] (3) to[bend left=35] (1);
+    \node[font=\tiny,align=left,anchor=north west] at (2.8,.35)
+      {\textbf{Vértice 2:}\\Grau de Entrada: 1\\Grau de Saída: 1};
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Grafos Ponderados}
+  \begin{itemize}
+    \item Em um \textbf{Grafo Ponderado}, cada aresta possui um valor numérico associado, chamado de \textbf{peso} ou \textbf{custo}.
+    \item Este peso pode representar distância, tempo, custo financeiro, capacidade, etc.
+  \end{itemize}
+  \centering
+  % Figura original: figs/GrafoPonderado.png
+  \begin{tikzpicture}[x=1.1cm,y=1.1cm,every node/.style={font=\tiny}]
+    \node[vs] (A) at (-1,0) {A};
+    \node[vs] (B) at (0,1) {B};
+    \node[vs] (D) at (1,0) {D};
+    \node[vs] (C) at (0,-1) {C};
+    \draw (A) -- node[above left]{5} (B);
+    \draw (B) -- node[above right]{1} (D);
+    \draw (B) -- node[pos=.3,right]{4} (C);
+    \draw (A) -- node[below left]{2} (C);
+    \draw (C) -- node[below right]{8} (D);
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Grafos Ponderados}
+  \begin{itemize}
+    \item Em um \textbf{Grafo Ponderado}, cada aresta possui um valor numérico associado, chamado de \textbf{peso} ou \textbf{custo}.
+    \item Este peso pode representar distância, tempo, custo financeiro, capacidade, etc.
+  \end{itemize}
+  \begin{block}{Aplicações}
+    Grafos ponderados são essenciais para problemas de otimização. O Algoritmo de Dijkstra, que veremos mais tarde, opera em grafos ponderados para encontrar o caminho de menor custo.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Grafos Isomorfos}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Dois grafos $G_1(V_1,E_1)$ e $G_2(V_2,E_2)$ são isomorfos se existir uma bijeção $f: V_1 \rightarrow V_2$ tal que $(u,v) \in E_1$ se e somente se $(f(u),f(v)) \in E_2$
+      \begin{itemize}
+        \item $\mathbf{(u,v) \in E_1 \Longleftrightarrow (f(u),f(v)) \in E_2}$
+        \item É possível re-rotular os vértices de $G_1$ com os rótulos de $G_2$ mantendo as arestas correspondentes em $G_1$ e $G_2$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    \includegraphics[width=0.75\linewidth]{figs/GrafoIsomorfismo_2.png}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Grafos Isomorfos}
+  \begin{itemize}
+    \item São aplicados em grafos com a mesma estrutura topológica
+  \end{itemize}
+  \centering
+  % Figura original: figs/GrafoIsomorfismo.png
+  \begin{tikzpicture}[x=.85cm,y=.85cm,
+      iv/.style={circle,draw=black,inner sep=0pt,minimum size=5mm,font=\scriptsize\itshape}]
+    \node[font=\scriptsize\bfseries] at (.5,3.7) {Grafo G};
+    \node[iv,fill=blue!35]    (a) at (0,3) {a};
+    \node[iv,fill=green!45]   (g) at (1,3) {g};
+    \node[iv,fill=magenta!35] (b) at (0,2) {b};
+    \node[iv,fill=red!40]     (h) at (1,2) {h};
+    \node[iv,fill=lime!50]    (c) at (0,1) {c};
+    \node[iv,fill=orange!40]  (i) at (1,1) {i};
+    \node[iv,fill=cyan!40]    (d) at (0,0) {d};
+    \node[iv,fill=violet!45]  (j) at (1,0) {j};
+    \draw (a)--(g) (a)--(h) (a)--(i) (b)--(g) (b)--(h) (b)--(j)
+          (c)--(g) (c)--(i) (c)--(j) (d)--(h) (d)--(i) (d)--(j);
+    \begin{scope}[xshift=2.2cm]
+      \node[font=\scriptsize\bfseries] at (1.5,3.7) {Grafo H};
+      \node[iv,fill=blue!35]    (1) at (0,3) {1};
+      \node[iv,fill=red!40]     (2) at (3,3) {2};
+      \node[iv,fill=cyan!40]    (3) at (3,0) {3};
+      \node[iv,fill=orange!40]  (4) at (0,0) {4};
+      \node[iv,fill=green!45]   (5) at (.9,2.1) {5};
+      \node[iv,fill=magenta!35] (6) at (2.1,2.1) {6};
+      \node[iv,fill=violet!45]  (7) at (2.1,.9) {7};
+      \node[iv,fill=lime!50]    (8) at (.9,.9) {8};
+      \draw (1)--(2)--(3)--(4)--(1) (5)--(6)--(7)--(8)--(5)
+            (1)--(5) (2)--(6) (3)--(7) (4)--(8);
+    \end{scope}
+    \node[font=\scriptsize,align=left,anchor=north west] at (6.6,3.95)
+      {\textbf{Isomorfismo}\\\textbf{entre G e H}\\[3pt]
+       $f(a)=1$\\$f(b)=6$\\$f(c)=8$\\$f(d)=3$\\$f(g)=5$\\$f(h)=2$\\$f(i)=4$\\$f(j)=7$};
+  \end{tikzpicture}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Estrutura de Árvore em Grafo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Árvore}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Um grafo $T(V,E)$ conexo e sem ciclos é chamado \textbf{árvore} e possui as seguintes propriedades:
+      \begin{itemize}
+        \item Seja $v \in V$. Se $v$ possui grau $\leq 1$, então $v$ é \textbf{folha}. Se o grau é $> 1$, então $v$ é \textbf{interno}
+        \item Uma árvore $T$ com $n$ vértices possui $n-1$ arestas
+        \item Um grafo $G$ é uma árvore se e somente se existe um único caminho entre cada par de vértices de $G$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    % Figura original: figs/arvore.png (as seis árvores não isomorfas com 6 vértices)
+    \begin{tikzpicture}[x=.36cm,y=.36cm,every node/.style={dot,minimum size=3pt}]
+      % T1: caminho
+      \foreach \k in {0,...,5} \node (p\k) at (0,\k) {};
+      \draw (p0)--(p5);
+      % T2
+      \foreach \k in {2,...,5} \node (q\k) at (3,\k) {};
+      \node (q0) at (2.2,1) {}; \node (q1) at (3.8,1) {};
+      \draw (q5)--(q2)--(q0) (q2)--(q1);
+      % T3
+      \foreach \k in {2,...,4} \node (r\k) at (6,\k) {};
+      \node (ra) at (5.2,1) {}; \node (rb) at (6,1) {}; \node (rc) at (6.8,1) {};
+      \draw (r4)--(r2) (r2)--(ra) (r2)--(rb) (r2)--(rc);
+      % T4: estrela
+      \node (s0) at (9.5,2.5) {};
+      \foreach \p in {(9.5,3.5),(8.4,2.5),(10.6,2.5),(8.7,1.6),(10.3,1.6)}
+        \draw (s0)--\p node {};
+      % T5
+      \foreach \k in {1,...,4} \node (t\k) at (13,\k) {};
+      \node (t5) at (14,3) {}; \node (t6) at (14,2) {};
+      \draw (t4)--(t1) (t3)--(t5) (t2)--(t6);
+      % T6
+      \foreach \k in {0,...,4} \node (w\k) at (16.5,\k) {};
+      \node (w5) at (17.5,2) {};
+      \draw (w4)--(w0) (w2)--(w5);
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Árvore geradora}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Dado um grafo $G(V,E)$, denomina-se \textbf{subgrafo gerador} o grafo $H(V,E')$ que é subgrafo de $G$ e tal que $V(G) = V(H)$
+      \begin{itemize}
+        \item Se H é uma árvore, então é chamado de \textbf{árvore geradora}
+      \end{itemize}
+    \end{itemize}
+    \centering
+    % Figura original: figs/arvoreGeradora.png
+    \begin{tikzpicture}[x=.55cm,y=.55cm,every label/.style={font=\tiny}]
+      \foreach \sx/\titulo/\letra/\arestas in {
+          0/{(a) Grafo $G$}/(a)/{1/2,2/3,3/4,4/5,5/6,6/1,1/4,1/5,5/2},
+          4.2/{(b) Subgrafo gerador}/(b)/{1/2,2/3,3/4,4/5,5/6,1/5},
+          8.4/{(c) Árvore geradora}/(c)/{1/6,1/5,1/2,2/3,3/4}} {
+        \begin{scope}[xshift=\sx cm]
+          \node[font=\tiny] at (0,1.9) {\titulo};
+          \node[dot,minimum size=3pt,label=above:1] (h1) at (0,1.1) {};
+          \node[dot,minimum size=3pt,label=right:2] (h2) at (1,.5) {};
+          \node[dot,minimum size=3pt,label=right:3] (h3) at (1,-.5) {};
+          \node[dot,minimum size=3pt,label=below:4] (h4) at (0,-1.1) {};
+          \node[dot,minimum size=3pt,label=left:5]  (h5) at (-1,-.5) {};
+          \node[dot,minimum size=3pt,label=left:6]  (h6) at (-1,.5) {};
+          \foreach \p/\q in \arestas \draw (h\p)--(h\q);
+          \node[font=\tiny] at (0,-2) {\letra};
+        \end{scope}
+      }
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+% Grafo 1..6 dos slides de corte (vértice e aresta).
+\newcommand{\GrafoCorte}[1]{%
+  \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]above left:1}] (c1) at (.4,1.5) {};
+  \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]above:2}] (c2) at (1.9,1.9) {};
+  \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]above right:3}] (c3) at (2.8,1.7) {};
+  \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]below:4}] (c4) at (2.3,.6) {};
+  \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]below:5}] (c5) at (.7,0) {};
+  \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]left:6}] (c6) at (0,.7) {};
+  \foreach \p/\q in {#1} \draw[thick] (c\p)--(c\q);}
+
+\begin{frame}{Corte de vértice e aresta}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item \textbf{Corte de vértice} em $G(V,E)$ é um subconjunto \underline{\textbf{mínimo}} de vértices $V_1$, com $V_1\subseteq V$, tal que, se os vértices de $V_1$ forem removidos de $G$, o grafo fica desconexo ou trivial.
+    \end{itemize}
+    \centering
+    % Figura original: figs/CorteVertice_1.png  (corte {1,5})
+    \begin{tikzpicture}[x=1.15cm,y=1.05cm]
+      \GrafoCorte{1/2,1/6,1/5,6/5,2/5,2/3,3/4,4/5}
+      \draw[gray] (3.5,-.4)--(3.5,2.2);
+      \begin{scope}[xshift=4.3cm]
+        \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]above:2}] (d2) at (1.9,1.9) {};
+        \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]above right:3}] (d3) at (2.8,1.7) {};
+        \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]below:4}] (d4) at (2.3,.6) {};
+        \node[dot,minimum size=5pt,label={[font=\tiny\bfseries]left:6}] (d6) at (0,.7) {};
+        \draw[thick] (d2)--(d3)--(d4);
+      \end{scope}
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Corte de vértice e aresta}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item \textbf{Corte de aresta} em $G(V,E)$ é um subconjunto \underline{\textbf{mínimo}} de arestas $E_1$, com $E_1\subseteq E$, tal que, se as arestas de $E_1$ forem removidas de $G$, o grafo fica desconexo.
+    \end{itemize}
+    \centering
+    % Figura original: figs/CorteAresta.png  (corte {(2,3),(4,5)})
+    \begin{tikzpicture}[x=1.15cm,y=1.05cm]
+      \GrafoCorte{1/2,1/6,1/5,6/5,2/5,2/3,3/4,4/5}
+      \draw[gray] (3.5,-.4)--(3.5,2.2);
+      \begin{scope}[xshift=4.3cm]
+        \GrafoCorte{1/2,1/6,1/5,6/5,2/5,3/4}
+      \end{scope}
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Vértice de corte}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Um vértice $v_j$ de um grafo $G$ é dito \textbf{vértice de corte ou ponto de articulação} se sua remoção (juntamente com as arestas a ele conectadas) provoca uma redução na conexidade, ou seja, torna o grafo desconexo.
+      \begin{itemize}
+        \item Produz um grafo com mais componentes conexas que o grafo original.
+        \item $Componentes(G) < Componentes(G-v_j)$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    % Figura original: figs/verticeCorte.png
+    \begin{tikzpicture}[x=.55cm,y=.55cm,
+        cv/.style={circle,draw,fill=white,inner sep=0pt,minimum size=3.2mm,font=\tiny}]
+      \node[font=\tiny,red,align=left] at (-3.2,1) {Vértice de corte\\(articulação)};
+      \draw[-{Stealth},very thick,red] (-1.7,.7)--(-.6,.7);
+      \node[cv] (1) at (0,2) {1};   \node[cv] (2) at (1.2,2) {2};
+      \node[cv] (4) at (.6,.7) {4}; \node[cv,fill=red!20] at (.6,.7) {4};
+      \node[cv] (5) at (2,.4) {5};  \node[cv] (3) at (3,2) {3};
+      \node[cv] (8) at (4.2,.9) {8};\node[cv] (6) at (-.3,-.5) {6};
+      \node[cv] (7) at (2.8,-.7) {7};
+      \draw (1)--(2) (1)--(4) (2)--(4) (4)--(3) (4)--(5) (4)--(6)
+            (5)--(7) (6)--(7) (3)--(7) (3)--(8) (8)--(7);
+      \begin{scope}[xshift=4cm]
+        \node[cv] (r1) at (0,2) {1};   \node[cv] (r2) at (1.2,2) {2};
+        \node[cv] (r5) at (2,.4) {5};  \node[cv] (r3) at (3,2) {3};
+        \node[cv] (r8) at (4.2,.9) {8};\node[cv] (r6) at (-.3,-.5) {6};
+        \node[cv] (r7) at (2.8,-.7) {7};
+        \draw (r1)--(r2) (r5)--(r7) (r6)--(r7) (r3)--(r7) (r3)--(r8) (r8)--(r7);
+        \node[font=\tiny,red] at (2,-1.6) {Remoção do vértice 4 criou duas componentes conexas};
+      \end{scope}
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Aresta de Corte}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Uma aresta de $G$ é dita \textbf{aresta de corte ou ponte} se, ao ser retirada de $G$, ele se torna desconexo.
+    \end{itemize}
+    \centering
+    % Figura original: figs/arestaCorte.png
+    \begin{tikzpicture}[x=.8cm,y=.8cm]
+      \node[ring] (a) at (0,1.2) {a};
+      \node[ring] (d) at (1.6,1.7) {d};
+      \node[ring] (c) at (1.4,.6) {c};
+      \node[ring] (b) at (0,.1) {b};
+      \node[ring] (e) at (1.7,-.4) {e};
+      \node[ring] (f) at (3.6,.7) {f};
+      \node[ring] (g) at (3.8,1.8) {g};
+      \node[ring] (h) at (5,-.1) {h};
+      \draw[blue!60!black] (a)--(d) (a)--(c) (b)--(c) (c)--(d) (c)--(e)
+            (f)--(g) (f)--(h) (g)--(h);
+      \draw[blue!60!black,very thick] (c)--(f);
+      \draw[-{Stealth},line width=2pt,red] (2.6,-.6)--(2.95,-.2);
+      \node[font=\tiny,red,align=left,anchor=north west] at (2.4,-.65)
+        {Aresta de corte (ponte)\\$e=\{c,f\}$};
+    \end{tikzpicture}
+  \end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Representação computacional}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Do Desenho ao Código}
+  \begin{itemize}
+    \item Como traduzimos a ideia de um grafo para uma estrutura que o computador entenda? A escolha da representação é \textbf{crítica} porque afeta diretamente a eficiência (tempo e memória) dos nossos algoritmos.
+  \end{itemize}
+  \begin{block}{As Três Grandes Representações}
+    \begin{enumerate}
+      \item \textbf{Matriz de Adjacências:} ótima para verificar rapidamente se uma aresta existe.
+      \item \textbf{Lista de Adjacências:} a mais comum e eficiente em memória para grafos com poucas arestas.
+      \item \textbf{Matriz de Incidência:} mais especializada, útil para certas análises de rede.
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\subsection{Matriz de Adjacências}
+\begin{frame}{Matriz de Adjacências}
+  \begin{itemize}
+    \item Representamos o grafo como uma matriz quadrada $M$ de dimensão $|V| \times |V|$.
+    \item Se os vértices são numerados de 0 a $|V|-1$, a entrada $M[i][j]$ da matriz informa sobre a aresta entre o vértice $i$ e o vértice $j$.
+  \end{itemize}
+  \begin{block}{Regra (para grafos não-ponderados)}
+    \[
+      M[i][j] =
+      \begin{cases}
+        1, & \text{se existe a aresta } (i,j)\\
+        0, & \text{caso contrário}
+      \end{cases}
+    \]
+  \end{block}
+  \begin{itemize}
+    \item Para grafos ponderados, armazenamos o peso da aresta em vez de 1.
+    \item Para grafos \textbf{não-direcionados}, a matriz é sempre \textbf{simétrica} ($M[i][j] = M[j][i]$).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Exemplo: Matriz de Adjacências}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \centering
+    \GrafoRepresentacao
+    \column{0.45\linewidth}
+    \centering
+    \begin{tabular}{@{}c|ccccc@{}}
+      \toprule
+         & 0 & 1 & 2 & 3 & 4 \\
+      \midrule
+      0  & 0 & 1 & 0 & 0 & 1 \\
+      1  & 1 & 0 & 1 & 1 & 1 \\
+      2  & 0 & 1 & 0 & 1 & 0 \\
+      3  & 0 & 1 & 1 & 0 & 1 \\
+      4  & 1 & 1 & 0 & 1 & 0 \\
+      \bottomrule
+    \end{tabular}
+  \end{columns}
+  \begin{block}{Análise}
+    \begin{itemize}
+      \item \textbf{Espaço:} $O(|V|^2)$. Ineficiente para grafos com poucas arestas (esparsos).
+      \item \textbf{Verificar Aresta} $(u,v)$\textbf{:} $O(1)$. Excelente!
+      \item \textbf{Listar Vizinhos de} $u$\textbf{:} $O(|V|)$. Precisa varrer uma linha inteira.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item A matriz de adjacências é \textbf{simétrica} para grafos não direcionados
+    \item Dígrafo
+    \begin{itemize}
+      \item Para $(v_i,v_j)$, partindo de $v_i$ e chegando em $v_j$, somente a posição $M_{ij}$ será preenchida com $1$
+    \end{itemize}
+    \item Espaço de armazenamento das informações
+    \begin{itemize}
+      \item $O(|V|^2)$
+      \item Indicado para \textbf{grafos densos}
+      \begin{itemize}
+        \item Número de arestas é próximo de $|V|^2$
+      \end{itemize}
+      \item Desvantagem em \textbf{grafos esparsos}
+      \begin{itemize}
+        \item Número de arestas é bem menor que $|V|^2$
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\subsection{Matriz de Incidências}
+\begin{frame}
+  \begin{block}{Definição}
+    \begin{itemize}
+      \item Dado $G(V,E)$ com $|V|$ vértices e $|E|$ arestas, a matriz de incidência $M_{|V|\times|E|} = [b_{ij}]$ é definida por:
+      \begin{equation}
+        b_{ij} =
+        \begin{cases}
+          1,  & \text{se a aresta } j \text{ sai do vértice } i \\
+          -1, & \text{se a aresta } j \text{ entra no vértice } i \\
+          0,  & \text{caso contrário}
+        \end{cases}
+      \end{equation}
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+% Dígrafo/grafo 1..6 com arestas e1..e7 dos slides de matriz de incidência.
+% #1: estilo das arestas (arc para dígrafo, vazio para grafo)
+\newcommand{\GrafoIncidencia}[1]{%
+\begin{tikzpicture}[x=1.05cm,y=1.05cm,every label/.style={font=\scriptsize\bfseries},
+    el/.style={font=\tiny,inner sep=1pt}]
+  \node[dot,minimum size=5pt,label=above left:1] (1) at (0,2) {};
+  \node[dot,minimum size=5pt,label=above right:2] (2) at (2.5,2.1) {};
+  \node[dot,minimum size=5pt,label=above:3] (3) at (1.6,1.3) {};
+  \node[dot,minimum size=5pt,label=left:5] (5) at (1.6,.4) {};
+  \node[dot,minimum size=5pt,label=above left:4] (4) at (0,.7) {};
+  \node[dot,minimum size=5pt,label=right:6] (6) at (1.6,-.5) {};
+  \draw[#1] (1) -- node[el,above right]{e1} (3);
+  \draw[#1] (2) -- node[el,above left]{e2} (3);
+  \draw[#1] (2) -- node[el,right]{e3} (5);
+  \draw[#1] (3) -- node[el,left]{e4} (5);
+  \draw[#1] (4) -- node[el,above left]{e5} (3);
+  \draw[#1] (4) -- node[el,below left]{e6} (6);
+  \draw[#1] (6) -- node[el,right]{e7} (5);
+\end{tikzpicture}}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    % Figura original: figs/MatrizIncidencia.png
+    \GrafoIncidencia{arc}\hspace{.5cm}%
+    \small
+    \begin{tabular}[b]{@{}c|rrrrrrr@{}}
+      \toprule
+        & e1 & e2 & e3 & e4 & e5 & e6 & e7 \\
+      \midrule
+      1 & 1  & 0  & 0  & 0  & 0  & 0  & 0  \\
+      2 & 0  & 1  & 1  & 0  & 0  & 0  & 0  \\
+      3 & $-1$ & $-1$ & 0 & 1 & $-1$ & 0 & 0 \\
+      4 & 0  & 0  & 0  & 0  & 1  & 1  & 0  \\
+      5 & 0  & 0  & $-1$ & $-1$ & 0 & 0 & $-1$ \\
+      6 & 0  & 0  & 0  & 0  & 0  & $-1$ & 1 \\
+      \bottomrule
+    \end{tabular}
+    \caption*{Dígrafo e sua Matriz de incidência}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    % Figura original: figs/MatrizIncidencia_1.png
+    \GrafoIncidencia{}\hspace{.5cm}%
+    \small
+    \begin{tabular}[b]{@{}c|ccccccc@{}}
+      \toprule
+        & e1 & e2 & e3 & e4 & e5 & e6 & e7 \\
+      \midrule
+      1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+      2 & 0 & 1 & 1 & 0 & 0 & 0 & 0 \\
+      3 & 1 & 1 & 0 & 1 & 1 & 0 & 0 \\
+      4 & 0 & 0 & 0 & 0 & 1 & 1 & 0 \\
+      5 & 0 & 0 & 1 & 1 & 0 & 0 & 1 \\
+      6 & 0 & 0 & 0 & 0 & 0 & 1 & 1 \\
+      \bottomrule
+    \end{tabular}
+    \caption*{Grafo e sua Matriz de incidência}
+  \end{figure}
+\end{frame}
+
+\subsection{Lista de Adjacências}
+\begin{frame}{Lista de Adjacências}
+  \vfill
+  \begin{itemize}
+    \item A representação mais popular para a maioria das aplicações.
+    \item Consiste em um array (ou vetor) de $|V|$ listas.
+    \item Para cada vértice $u$, a entrada $Adj[u]$ armazena uma lista de todos os vértices $v$ que são adjacentes a $u$.
+  \end{itemize}
+  \vfill
+\end{frame}
+
+\begin{frame}{Exemplo: Lista de Adjacências}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \centering
+    \GrafoRepresentacao
+    \column{0.45\linewidth}
+    \begin{tabular}{@{}r@{\;:\;}l@{}}
+      0 & $\rightarrow [1, 4]$ \\[2pt]
+      1 & $\rightarrow [0, 2, 3, 4]$ \\[2pt]
+      2 & $\rightarrow [1, 3]$ \\[2pt]
+      3 & $\rightarrow [1, 2, 4]$ \\[2pt]
+      4 & $\rightarrow [0, 1, 3]$
+    \end{tabular}
+  \end{columns}
+  \begin{block}{Análise}
+    \begin{itemize}
+      \item \textbf{Espaço:} $O(|V|+|E|)$. Muito eficiente para grafos esparsos.
+      \item \textbf{Verificar Aresta} $(u,v)$\textbf{:} $O(deg(u))$. Precisa percorrer a lista de $u$.
+      \item \textbf{Listar Vizinhos de} $u$\textbf{:} $O(deg(u))$. Excelente, o custo é proporcional ao número de vizinhos.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Algoritmos de Busca}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}{Introdução}
+  \begin{itemize}
+    \item O objetivo é mostrar um \textbf{procedimento sistemático} para percorrer os vértices e as arestas de um grafo.
+    \item \textbf{\underline{Marcar} um vértice}
+    \begin{itemize}
+      \item Evitar repetição
+      \item Distinguir dos vértices que ainda não foram processados
+    \end{itemize}
+    \item Ideia geral
+    \begin{itemize}
+      \item Dado $G(V,E)$ conexo e com todos os vértices desmarcados
+      \item Inicialmente, marque um vértice $u$ qualquer. Nenhuma aresta $(u,v) \in E$ foi selecionada ainda
+      \item Ao selecionar a aresta $(u,v)$, o vértice $v$ é marcado
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item Algoritmo de busca em profundidade (\textit{Depth-First Search} - DFS)
+    \item Algoritmo de busca em largura (\textit{Breadth-First Search} - BFS)
+  \end{itemize}
+\end{frame}
+
+\subsection{Busca em Largura}
+\begin{frame}
+  \begin{itemize}
+    \item Critério da busca em largura para escolher o próximo vértice marcado a ser explorado:
+    \begin{itemize}
+      \item \emph{dentre os vértices marcados e incidentes a alguma aresta ainda não explorada, escolher aquele que foi alcançado primeiro na busca}
+    \end{itemize}
+    \item Arquétipo de muitos algoritmos importantes
+    \begin{itemize}
+      \item Algoritmo de Dijkstra.
+      \item Algoritmo de árvore geradora mínima de Prim.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item \textbf{Ideia Central:} explorar o grafo ``camada por camada'' a partir de um vértice de origem.
+    \item Primeiro, visita todos os vizinhos diretos (distância 1), depois os vizinhos dos vizinhos (distância 2), e assim por diante.
+  \end{itemize}
+  \begin{block}{Como Funciona?}
+    Utiliza uma \textbf{Fila (Queue)} para controlar a ordem de visitação.
+    \begin{enumerate}
+      \item Comece em um vértice $s$, marque-o como visitado e coloque-o na fila.
+      \item Enquanto a fila não estiver vazia:
+      \begin{enumerate}
+        \item Retire um vértice $u$ da frente da fila.
+        \item Para cada vizinho $v$ de $u$ que ainda não foi visitado:
+        \begin{itemize}
+          \item Marque $v$ como visitado.
+          \item Coloque $v$ no final da fila.
+        \end{itemize}
+      \end{enumerate}
+    \end{enumerate}
+  \end{block}
+  \begin{alertblock}{Principal Aplicação}
+    A BFS garante encontrar o \textbf{caminho mais curto} (em número de arestas) entre a origem $s$ e qualquer outro vértice em um grafo \textbf{não-ponderado}.
+  \end{alertblock}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item Dado $G(V,E)$ conexo e um vértice de origem $\mathbf{s}$, a busca em largura explora as arestas de $G$ até alcançar todos os vértices acessíveis a partir de $\mathbf{s}$.
+    \item Calcula a menor distância, em número de arestas, de $\mathbf{s}$ até cada vértice de $G(V,E)$
+    \item O nome vem do fato de que ela descobre todos os vértices que estão a uma distância $\mathbf{k}$ de $\mathbf{s}$ antes de descobrir os que estão a uma distância $\mathbf{k+1}$
+    \begin{itemize}
+      \item A fronteira entre vértices descobertos e não descobertos avança de maneira uniforme ao longo de toda a sua largura
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{itemize}
+    \item Produz uma \textbf{árvore} com raiz $\mathbf{s}$
+    \item Computa o \emph{caminho mais curto} de $\mathbf{s}$ até $\mathbf{v}$
+    \begin{itemize}
+      \item Número mínimo de arestas
+    \end{itemize}
+    \item Aplicada em grafos direcionados ou não direcionados
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}[totalwidth=\paperwidth]
+    \column{0.57\paperwidth}
+    \begin{block}{Algoritmo}
+      \begin{itemize}
+        \item Cada vértice é colorido de \textbf{branco, cinza ou preto}.
+        \item Todos os vértices são inicializados como \textbf{branco}
+        \item Quando um vértice é descoberto pela primeira vez, ele se torna \textbf{cinza}
+        \item Vértices \textbf{cinza} e \textbf{preto} já foram descobertos, mas são distinguidos para assegurar que a busca ocorra em largura.
+        \item Se $(u,v) \in E$ e o vértice $u$ é preto, então o vértice $v$ tem que ser cinza ou preto
+        \item Vértices \textbf{cinza} podem ter vértices adjacentes \textbf{brancos}, e eles representam a \textbf{fronteira} entre vértices descobertos e não descobertos
+      \end{itemize}
+    \end{block}
+    \column{0.40\paperwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figs/BFS.png}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figs/BFS_run.png}
+    \caption*{Execução do algoritmo busca em largura}
+    \label{fig:1}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}[totalwidth=\paperwidth]
+    \column{0.57\paperwidth}
+    \begin{block}{Análise}
+      \begin{itemize}
+        \item O teste da linha 13 assegura que cada vértice é colocado na fila no máximo uma vez.
+        \item As operações de enfileirar e desenfileirar têm custo O(1), logo o custo total com a fila é O($|V|$).
+        \item Cada lista de adjacências é percorrida no máximo uma vez, quando o vértice é desenfileirado.
+        \item Como a soma dos comprimentos de todas as listas de adjacências é $\Theta(|E|)$, o tempo total gasto com essas listas é $O(|E|)$
+        \item Tempo total da BFS: $O(|V|+|E|)$
+      \end{itemize}
+    \end{block}
+    \column{0.40\paperwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figs/BFS.png}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Busca em Largura - Exercício I}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \footnotesize
+    \begin{block}{}
+      \begin{itemize}
+        \item Mostre os valores de $\mathbf{d}$ e da fila que resultam da execução da busca em largura sobre o grafo ao lado, usando o vértice $\mathbf{3}$ como origem
+      \end{itemize}
+    \end{block}
+    \column{0.5\linewidth}
+    \centering
+    \includegraphics[width=0.85\linewidth]{figs/Grafo22_2_A.png}
+  \end{columns}
+\end{frame}
+
+\subsection{Busca em Profundidade}
+\begin{frame}
+  \begin{itemize}
+    \item A estratégia é buscar o mais fundo possível no grafo sempre que der.
+    \item As arestas são exploradas a partir do vértice $\mathbf{v}$ descoberto mais recentemente que ainda possui arestas não exploradas saindo dele.
+    \item Quando todas as arestas adjacentes a $\mathbf{v}$ tiverem sido exploradas, a busca retrocede para explorar as arestas que saem do vértice a partir do qual $\mathbf{v}$ foi descoberto.
+    \item O algoritmo é a base para muitos outros algoritmos importantes, como a verificação de grafos acíclicos, a ordenação topológica e a identificação de componentes fortemente conectados.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Ideia Central}
+  \begin{itemize}
+    \item Para acompanhar o progresso do algoritmo, cada vértice é \textbf{colorido} de branco, cinza ou preto
+    \item Todos os vértices são inicializados como branco
+    \item Quando um vértice é descoberto pela primeira vez, ele se torna \textbf{cinza}, e passa a \textbf{preto} quando sua lista de adjacentes tiver sido completamente examinada.
+    \item \textbf{Carimbo de Tempo}
+    \begin{itemize}
+      \item $d[v]$: tempo de descoberta
+      \item $f[v]$: tempo de término do exame da lista de adjacentes de $\mathbf{v}$
+      \item Esses registros são inteiros entre $1$ e $2|V|$, pois existe um evento de descoberta e um evento de término para cada um dos $|V|$ vértices
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Ideia Central}
+  \begin{itemize}
+    \item Sempre que um vértice $\mathbf{v}$ é descoberto durante a varredura da lista de adjacências de um vértice já descoberto $\mathbf{u}$
+    \begin{itemize}
+      \item o algoritmo registra esse evento definindo o \textbf{predecessor} de $\mathbf{v}$, $\boldsymbol{\pi}[\mathbf{v}]$
+      \item $\boldsymbol{\pi}[\mathbf{v}] = u$
+      \begin{description}
+        \item[subgrafo predecessor] $G_{\pi}= (V, E_{\pi})$
+        \begin{itemize}
+          \item $E_{\pi} = \{ (\pi[v],v): v \in V \text{ e } \pi[v] \neq \text{NIL} \}$
+          \item A DFS forma várias árvores (uma floresta), porque a busca pode ser repetida a partir de diversas origens.
+        \end{itemize}
+      \end{description}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo - Busca em Profundidade}
+  \begin{columns}[totalwidth=\paperwidth]
+    \column{0.5\paperwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figs/DFS_1.png}
+    \column{0.48\paperwidth}
+    \centering
+    \includegraphics[width=\linewidth]{figs/DFS_2.png}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Algoritmo - Busca em Profundidade}
+  \centering
+  \includegraphics[height=0.78\textheight]{figs/DFS_run.png}
+\end{frame}
+
+\begin{frame}{Análise - Busca em Profundidade}
+  \begin{itemize}
+    \item Os dois \textit{loops} do procedimento DFS gastam tempo $\Theta(V)$
+    \item O procedimento $DFS\_VISIT$ é chamado exatamente uma vez para cada vértice $v \in V$, já que ele só é chamado para vértices brancos e sua primeira ação é pintá-los de cinza.
+    \item No loop das linhas 4-7 de $DFS\_VISIT(v)$, o corpo é executado $|Adj[v]|$ vezes
+    \begin{itemize}
+      \item O custo total de tempo é $\sum\limits_{v \in V} |Adj[v]|= \Theta (E)$
+    \end{itemize}
+    \item Tempo total: $\Theta(V+E)$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Classificação das Arestas - Busca em Profundidade}
+  A classificação das arestas pode ser útil para derivar outros algoritmos
+  \begin{description}
+    \item[Arestas de árvore] são as arestas de uma árvore de busca em profundidade. A aresta $\mathbf{(u,v)}$ é uma aresta de árvore se $\mathbf{v}$ foi descoberto pela primeira vez ao percorrer a aresta $\mathbf{(u,v)}$
+    \item[Arestas de retorno] conectam um vértice $\mathbf{u}$ a um antecessor $\mathbf{v}$ em uma árvore de busca em profundidade (inclui \textit{self-loops}).
+    \item[Arestas de avanço] são as arestas $\mathbf{(u,v)}$ que não pertencem à árvore de busca, mas conectam um vértice $\mathbf{u}$ a um descendente $\mathbf{v}$ nessa árvore.
+    \item[Arestas de cruzamento] são todas as demais. Podem conectar vértices na mesma árvore de busca em profundidade ou em duas árvores diferentes
+  \end{description}
+\end{frame}
+
+\subsection{Trabalho I.}
+\begin{frame}{Busca em Profundidade - Trabalho I}
+  \begin{block}{}
+    \begin{itemize}
+      \item A busca em profundidade pode ser usada para verificar se um grafo é acíclico ou se contém um ou mais ciclos.
+      \item Se uma aresta de retorno é encontrada durante a busca em $G(V,E)$, então o grafo tem ciclo
+      \item Um grafo direcionado $G(V,E)$ é acíclico se e somente se a busca em profundidade em $G(V,E)$ não apresentar arestas de retorno
+      \item O algoritmo pode ser alterado para descobrir arestas de retorno. Basta verificar se um vértice $\mathbf{v}$ adjacente a $\mathbf{u}$ está cinza na primeira vez em que a aresta $\mathbf{(u,v)}$ é percorrida
+    \end{itemize}
+    \begin{enumerate}
+      \item Faça uma implementação para verificar se um $G(V,E)$ é acíclico.
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Algoritmo de Caminho Mínimo}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Algoritmo de Dijkstra}
+\begin{frame}{O Problema do Caminho Mínimo}
+  \begin{itemize}
+    \item \textbf{Objetivo:} dado um grafo \textbf{ponderado} com pesos não-negativos, um vértice de origem $s$ e um de destino $t$, encontrar o caminho de $s$ a $t$ com a menor soma de pesos das arestas.
+    \item Esta é uma das aplicações mais famosas e úteis de grafos, sendo a base para sistemas de GPS e roteamento de redes.
+  \end{itemize}
+  \begin{block}{Algoritmo de Dijkstra}
+    \begin{itemize}
+      \item É um algoritmo \textbf{guloso (greedy)} que resolve o problema do caminho mínimo de uma única origem para todos os outros vértices.
+      \item \textbf{Ideia principal:} é uma generalização da BFS. Em vez de uma fila comum, usa uma \textbf{Fila de Prioridade (Priority Queue)} para escolher sempre, como próximo vértice a ser explorado, aquele com a menor distância \textit{conhecida} da origem.
+      \item \textbf{Restrição Crucial:} o algoritmo de Dijkstra \textbf{não funciona corretamente} se o grafo tiver arestas com pesos negativos.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}{Como Dijkstra Funciona (Intuitivamente)}
+  \begin{enumerate}
+    \item Crie um conjunto de ``distâncias'' para todos os vértices, inicializando a distância da origem $s$ como 0 e a de todos os outros como infinito.
+    \item Adicione a origem $s$ a uma fila em que a prioridade é a distância.
+    \item Mantenha um conjunto de vértices já ``finalizados'' (cujo caminho mínimo já foi encontrado), inicialmente vazio.
+    \item Enquanto a fila de prioridade não estiver vazia:
+    \begin{enumerate}
+      \item Extraia da fila o vértice $u$ com a menor distância. Adicione $u$ ao conjunto de finalizados.
+      \item Para cada vizinho $v$ de $u$:
+      \begin{itemize}
+        \item Calcule uma nova distância para $v$ passando por $u$: $dist(s,u) + peso(u,v)$.
+        \item Se essa nova distância for menor que a distância atual de $v$, atualize a distância de $v$ e sua prioridade na fila. Este passo é chamado de \textbf{relaxamento (relax)}.
+      \end{itemize}
+    \end{enumerate}
+  \end{enumerate}
+  \begin{itemize}
+    \item Ao final, o array de distâncias conterá o custo do caminho mínimo de $s$ até cada um dos outros vértices.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Problema dos Caminhos Mais Curtos}
+  \begin{itemize}
+    \item Modelagem
+    \begin{itemize}
+      \item $G = (V,E)$: grafo direcionado ponderado.
+      \item Função peso $\mathbf{w} : E\rightarrow \mathbb{R}$
+      \begin{itemize}
+        \item $w(u,v)$: peso de cada aresta
+      \end{itemize}
+      \item O \textbf{peso} de um caminho $\mathbf{p=\langle v_0,v_1,\dots,v_k\rangle}$ é a soma dos pesos de suas arestas:
+      $$w(p) = \sum\limits_{i=1}^{k} w(v_{i-1},v_i)$$
+    \end{itemize}
+    \item Definimos o \textbf{peso do caminho mais curto} de $u$ até $v$ por:
+    \begin{equation}
+      \delta(u,v) =
+      \begin{cases}
+        \min\{w(p):u\stackrel{p}{\rightsquigarrow} v \} & \text{se existir caminho de } u \text{ a } v\\
+        \infty, & \text{caso contrário}
+      \end{cases}
+    \end{equation}
+    \item O \textbf{caminho mais curto} do vértice $\mathbf{u}$ ao vértice $\mathbf{v}$ é, então, qualquer caminho $\mathbf{p}$ com peso $\mathbf{w(p) = \delta(u,v)}$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Problema dos Caminhos Mais Curtos}
+  \begin{itemize}
+    \item Modelagem de Problema
+    \begin{itemize}
+      \item Saber a rota mais curta entre Belém e Parauapebas
+      \item V: Estações
+      \item E: Segmentos de Estrada
+      \item w: \textbf{distâncias} entre as estações
+      \begin{itemize}
+        \item \textbf{Medidas}: quantidade que se acumula linearmente ao longo de um caminho e que se deseja minimizar
+      \end{itemize}
+      \item G(V,E): Mapa rodoviário
+    \end{itemize}
+    \item O algoritmo de Busca em Largura será nossa referência.
+    \item \textbf{Caminhos mais curtos a partir de uma origem}
+    \begin{itemize}
+      \item Dado um grafo ponderado $G = (V,E)$, desejamos obter o caminho mais curto de um vértice de origem $s \in V$ até cada $v \in V$
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Representação de Caminhos Mais Curtos}
+  \begin{itemize}
+    \item Os caminhos mais curtos podem ser representados pela variável \textbf{predecessor} $\boldsymbol{\pi}$
+    \item Para cada vértice $v \in V$, o predecessor $\boldsymbol{\pi}[\mathbf{v}]$ é outro vértice ou \textit{Null}
+    \item O algoritmo atribui aos predecessores os rótulos de uma cadeia de vértices que começa em $v$ e anda para trás ao longo de um caminho mais curto de $s$ até $v$
+    \item Em um passo intermediário, os valores de $\boldsymbol{\pi}[\mathbf{v}]$ não indicam necessariamente caminhos mais curtos
+    \item Ao final do processamento, porém, os predecessores formam uma árvore de caminhos mais curtos definidos \textbf{em termos dos pesos das arestas} de $G$, e não do \textbf{número de arestas}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo de Dijkstra}
+  \begin{itemize}
+    \item Mantém um conjunto $S$ de vértices cujos caminhos mais curtos a partir da origem já são conhecidos.
+    \item Produz uma árvore de caminhos mais curtos de um vértice de origem $s$ para todos os vértices alcançáveis a partir de $s$.
+    \item Utiliza \textbf{Relaxamento}
+    \begin{itemize}
+      \item Para cada $v \in V$, o atributo $\mathbf{d[v]}$ é um limite superior para o peso de um caminho mais curto da origem $s$ até $v$
+      \item O vetor $\mathbf{d[v]}$ contém uma estimativa de caminho mais curto
+    \end{itemize}
+    \item O primeiro passo do algoritmo é inicializar os predecessores e as estimativas de caminhos mais curtos
+    \begin{itemize}
+      \item Método \textit{INITIALIZE-SINGLE-SOURCE(G,s)}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Relaxamento}
+  \begin{itemize}
+    \item \emph{O relaxamento de uma aresta $(u,v)$ consiste em verificar se é possível melhorar o melhor caminho até $\mathbf{v}$ obtido até o momento passando por $\mathbf{u}$.}
+    \begin{itemize}
+      \item Uma etapa de relaxamento pode diminuir $d[v]$ e atualizar o campo $\pi[v]$.
+      \item No Dijkstra, cada aresta é relaxada somente 1 vez.
+    \end{itemize}
+  \end{itemize}
+  \begin{figure}
+    \centering
+    \includegraphics[height=0.42\textheight]{figs/relaxamento.png}
+    \caption*{Método \textit{Relax}}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Algoritmo de Dijkstra}
+  \begin{columns}
+    \column{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=.8\textheight,keepaspectratio]{figs/Dijkstra_ingles.png}
+    \column{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth,height=.7\textheight,keepaspectratio]{figs/Dijkstra_pt.png}
+  \end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+% Dijkstra passo a passo (origem 0)
+% ---------------------------------------------------------------------------
+\newcommand{\inS}{\cellcolor{gray!25}}
+\newcommand{\upd}[1]{\textcolor{red}{#1}}
+\newcommand{\DijkstraCab}{\toprule
+  \textbf{Vértice} & \textbf{d[v]} & $\boldsymbol{\pi}$\textbf{[v]}\\ \midrule}
+
+\begin{frame}{Dijkstra Passo a Passo: Início no Vértice 0}
+  \begin{columns}[totalwidth=\textwidth]
+    \column{0.63\textwidth}
+    \begin{itemize}
+      \item O conjunto de vértices visitados \textbf{S} começa vazio.
+      \item A Fila de Prioridade \textbf{Q} contém todos os vértices.
+      \item A distância $d[0]$ da origem é \textbf{0}.
+      \item Todas as outras distâncias $d[v]$ são inicializadas com $\infty$.
+    \end{itemize}
+    \vspace{.5em}
+    \centering
+    \begin{tabular}{ccc}
+      \DijkstraCab
+      0 & \textcolor{blue}{0} & NULL\\
+      1 & $\infty$ & NULL\\
+      2 & $\infty$ & NULL\\
+      3 & $\infty$ & NULL\\
+      4 & $\infty$ & NULL\\
+      \bottomrule
+    \end{tabular}\par
+    \vspace{.5em}
+    $\mathbf{S} = \{\}$
+    \column{0.37\textwidth}
+    \centering
+    \DijkstraGrafo{}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Dijkstra Passo a Passo: Início no Vértice 0}
+  \begin{columns}[totalwidth=\textwidth]
+    \column{0.63\textwidth}
+    \begin{itemize}
+      \item Extraímos de Q o vértice com menor distância: \textbf{0}.
+      \item Adicionamos \textbf{0} ao conjunto S.
+      \item \textbf{Relaxamos} as arestas que saem de 0:
+      \begin{itemize}
+        \item (0,1): $d[1] = \min(\infty, 0+1) = \upd{1}$
+        \item (0,3): $d[3] = \min(\infty, 0+3) = \upd{3}$
+        \item (0,4): $d[4] = \min(\infty, 0+10) = \upd{10}$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    \begin{tabular}{ccc}
+      \DijkstraCab
+      \inS 0 & 0 & NULL\\
+      1 & \upd{1} & 0\\
+      2 & $\infty$ & NULL\\
+      3 & \upd{3} & 0\\
+      4 & \upd{10} & 0\\
+      \bottomrule
+    \end{tabular}\par
+    \vspace{.5em}
+    $\mathbf{S} = \{\mathbf{0}\}$
+    \column{0.37\textwidth}
+    \centering
+    \DijkstraGrafo{n0/.style=dS, n1/.style=dU, n3/.style=dU, n4/.style=dU,
+                   e01/.style=dR, e03/.style=dR, e04/.style=dR}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Dijkstra Passo a Passo: Início no Vértice 0}
+  \begin{columns}[totalwidth=\textwidth]
+    \column{0.63\textwidth}
+    \begin{itemize}
+      \item Próximo vértice de Q com menor distância: \textbf{1} (d=1).
+      \item Adicionamos \textbf{1} ao conjunto S.
+      \item \textbf{Relaxamos} a aresta (1,2):
+      \begin{itemize}
+        \item $d[2] = \min(\infty, d[1]+5) = \min(\infty, 1+5) = \upd{6}$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    \begin{tabular}{ccc}
+      \DijkstraCab
+      \inS 0 & 0 & NULL\\
+      \inS 1 & 1 & 0\\
+      2 & \upd{6} & 1\\
+      3 & 3 & 0\\
+      4 & 10 & 0\\
+      \bottomrule
+    \end{tabular}\par
+    \vspace{.5em}
+    $\mathbf{S} = \{\mathbf{0}, \mathbf{1}\}$
+    \column{0.37\textwidth}
+    \centering
+    \DijkstraGrafo{n0/.style=dS, n1/.style=dS, n2/.style=dU, n4/.style=dU,
+                   e12/.style=dR}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Dijkstra Passo a Passo: Início no Vértice 0}
+  \begin{columns}[totalwidth=\textwidth]
+    \column{0.63\textwidth}
+    \begin{itemize}
+      \item Próximo vértice de Q: \textbf{3} (d=3).
+      \item Adicionamos \textbf{3} ao conjunto S.
+      \item \textbf{Relaxamos} as arestas que saem de 3:
+      \begin{itemize}
+        \item (3,2): $d[2] = \min(6, d[3]+2) = \min(6, 3+2) = \upd{5}$
+        \item (3,4): $d[4] = \min(10, d[3]+6) = \min(10, 3+6) = \upd{9}$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    \begin{tabular}{ccc}
+      \DijkstraCab
+      \inS 0 & 0 & NULL\\
+      \inS 1 & 1 & 0\\
+      2 & \upd{5} & \upd{3}\\
+      \inS 3 & 3 & 0\\
+      4 & \upd{9} & \upd{3}\\
+      \bottomrule
+    \end{tabular}\par
+    \vspace{.3em}
+    $\mathbf{S} = \{\mathbf{0}, \mathbf{1}, \mathbf{3}\}$
+    \column{0.37\textwidth}
+    \centering
+    \DijkstraGrafo{n0/.style=dS, n1/.style=dS, n3/.style=dS, n2/.style=dU, n4/.style=dU,
+                   e32/.style=dR, e34/.style=dR}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Dijkstra Passo a Passo: Início no Vértice 0}
+  \begin{columns}[totalwidth=\textwidth]
+    \column{0.63\textwidth}
+    \begin{itemize}
+      \item Próximo vértice de Q: \textbf{2} (d=5).
+      \item Adicionamos \textbf{2} ao conjunto S.
+      \item \textbf{Relaxamos} a aresta (2,4):
+      \begin{itemize}
+        \item $d[4] = \min(9, d[2]+1) = \min(9, 5+1) = \upd{6}$
+      \end{itemize}
+    \end{itemize}
+    \centering
+    \begin{tabular}{ccc}
+      \DijkstraCab
+      \inS 0 & 0 & NULL\\
+      \inS 1 & 1 & 0\\
+      \inS 2 & 5 & 3\\
+      \inS 3 & 3 & 0\\
+      4 & \upd{6} & \upd{2}\\
+      \bottomrule
+    \end{tabular}\par
+    \vspace{.5em}
+    $\mathbf{S} = \{\mathbf{0}, \mathbf{1}, \mathbf{3}, \mathbf{2}\}$
+    \column{0.37\textwidth}
+    \centering
+    \DijkstraGrafo{n0/.style=dS, n1/.style=dS, n2/.style=dS, n3/.style=dS, n4/.style=dU,
+                   e24/.style=dR}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Dijkstra Passo a Passo: Início no Vértice 0}
+  \begin{columns}[totalwidth=\textwidth]
+    \column{0.63\textwidth}
+    \begin{itemize}
+      \item Último vértice de Q: \textbf{4} (d=6).
+      \item Adicionamos \textbf{4} ao conjunto S.
+      \item Não há arestas para relaxar, pois não há vizinhos fora de S.
+      \item A fila Q fica vazia. O algoritmo termina.
+    \end{itemize}
+    \centering
+    \begin{tabular}{ccc}
+      \DijkstraCab
+      \inS 0 & 0 & NULL\\
+      \inS 1 & 1 & 0\\
+      \inS 2 & 5 & 3\\
+      \inS 3 & 3 & 0\\
+      \inS 4 & 6 & 2\\
+      \bottomrule
+    \end{tabular}\par
+    \vspace{.5em}
+    $\mathbf{S} = \{\mathbf{0}, \mathbf{1}, \mathbf{3}, \mathbf{2}, \mathbf{4}\}$
+    \column{0.37\textwidth}
+    \centering
+    \DijkstraGrafo{n0/.style=dS, n1/.style=dS, n2/.style=dS, n3/.style=dS, n4/.style=dS}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Algoritmo de Dijkstra}
+  \begin{itemize}
+    \item \textbf{Invariante:} no início de cada iteração do loop \textit{while}, a fila de prioridade (Heap) $\mathbf{Q}$ contém exatamente os vértices de $V-S$.
+    \item A cada iteração do \textit{while}, um vértice $\mathbf{u}$ é extraído da fila e adicionado ao conjunto $\mathbf{S}$, o que mantém o invariante.
+    \item \textbf{EXTRACT-MIN} obtém o vértice $\mathbf{u}$ com o menor caminho estimado até o momento e o adiciona ao conjunto $\mathbf{S}$.
+    \item No loop das linhas 7-8, a operação de relaxamento é realizada sobre cada aresta $\mathbf{(u,v)}$ que sai do vértice $\mathbf{u}$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo de Dijkstra}
+  \begin{itemize}
+    \item Para selecionar a nova aresta de forma eficiente, todos os vértices que ainda não estão na árvore de caminhos mais curtos ficam na fila $\mathbf{Q}$, ordenada pelo campo $\mathbf{d}$.
+    \item Para cada vértice $\mathbf{v}$, $\mathbf{d[v]}$ é o caminho mais curto obtido até o momento entre o vértice raiz e $\mathbf{v}$.
+    \item A fila guarda os vértices, mas a sua ordem é dada pelas estimativas armazenadas no arranjo $\mathbf{d[v]}$. Por isso, dizemos que a fila é indireta.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo de Dijkstra}
+  \begin{itemize}
+    \item O algoritmo usa uma estratégia \textbf{gulosa}: escolhe sempre o vértice mais leve (o mais perto) em $V-S$ para adicionar ao conjunto solução $\mathbf{S}$
+    \item O algoritmo de Dijkstra sempre obtém os caminhos mais curtos, pois cada vez que um vértice $u$ é adicionado ao conjunto $\mathbf{S}$ temos $d[u] = \delta(s,u)$.
+  \end{itemize}
+\end{frame}
+
+\subsection{Trabalho II}
+\begin{frame}{Algoritmo de Dijkstra - Trabalho II}
+  \begin{enumerate}
+    \item Execute o algoritmo de Dijkstra sobre o grafo orientado do slide \pageref{fig:Dijkstra_grafo_1}, primeiro usando o vértice \textbf{s} como origem e depois usando o vértice \textbf{z} como origem. Imprima os valores \textbf{d} e os vértices do conjunto \textbf{S} após cada iteração do loop \textit{while}
+    \item Dado um dígrafo $D$ sem ciclos direcionados, formule um algoritmo para encontrar o comprimento do maior caminho em $D$. A matriz de distâncias $W$ de $D$ é formada por distâncias não negativas.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Algoritmo de Dijkstra - Trabalho II}
+  \begin{figure}
+    \centering
+    % Figura original: figs/Dijkstra_grafo.png
+    \begin{tikzpicture}[x=1.25cm,y=1.25cm,
+        dn/.style={circle,draw,fill=gray!20,inner sep=0pt,minimum size=8mm},
+        w/.style={font=\normalsize}]
+      \node[dn,label={[font=\large\itshape]left:s}]  (s) at (0,0) {0};
+      \node[dn,label={[font=\large\itshape]above:t}] (t) at (1.6,1.2) {3};
+      \node[dn,label={[font=\large\itshape]above:x}] (x) at (3.8,1.2) {9};
+      \node[dn,label={[font=\large\itshape]below:y}] (y) at (1.6,-1.2) {5};
+      \node[dn,label={[font=\large\itshape]below:z}] (z) at (3.8,-1.2) {11};
+      \draw[arc] (s) -- node[w,above left]{3} (t);
+      \draw[arc] (s) -- node[w,below left]{5} (y);
+      \draw[arc] (t) -- node[w,above]{6} (x);
+      \draw[arc] (t) to[bend right=20] node[w,left]{2} (y);
+      \draw[arc] (y) to[bend right=20] node[w,right]{1} (t);
+      \draw[arc] (y) -- node[w,pos=.7,above left]{4} (x);
+      \draw[arc] (y) -- node[w,below]{6} (z);
+      \draw[arc] (x) to[bend right=20] node[w,left]{2} (z);
+      \draw[arc] (z) to[bend right=20] node[w,right]{7} (x);
+      \draw[arc] (z) -- node[w,pos=.35,below]{3} (s);
+    \end{tikzpicture}
+    \label{fig:Dijkstra_grafo_1}
+  \end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Referências Bibliográficas}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t,allowframebreaks]
+  \frametitle{Referências}
+  \begin{thebibliography}{*}
+    \bibitem[A01]{A01} Lee K.D., Hubbard S. (2015) Trees. In: Data Structures and Algorithms with Python. Undergraduate Topics in Computer Science. Springer, Cham. Retrieved from \url{https://doi.org/10.1007/978-3-319-13072-9_6}
+
+    \bibitem[A02]{A02} Hubbard, J. (2007). Schaum's Outline of Data Structures with Java. Retrieved from \url{http://www.amazon.com/Schaums-Outline-Data-Structures-Java/dp/0071476989}
+
+    \bibitem[A03]{A03} Cormen, T. H., Leiserson, C. E., \& Stein, R. L. R. E. C. (2012). Algoritmos: teoria e prática. Retrieved from \url{https://books.google.com.br/books?id=6iA4LgEACAAJ}.
+
+    \bibitem[A04]{A04} Ascencio, Ana Fernanda Gomes. Estrutura de dados: Algoritmos, análise da complexidade e implementações em Java e C++. São Paulo: Pearson Prentice Hall, 2010.
+
+    \bibitem[A05]{A05} Donald E. Knuth. Sorting and Searching, volume 3 of The Art of Computer Programming. Addison-Wesley, 1973. Second edition, 1998
+
+    \bibitem[A06]{A06} Szwarcfiter, Jayme Luiz. Estruturas de dados e seus algoritmos / Jayme Luiz Szwarcfiter, Lilian Markenzon. 3.ed. [Reimpr.]. - Rio de Janeiro : LTC, 2015.
+
+    \bibitem[A07]{A07} Learning about defaultdict in Python. Retrieved from \url{https://www.educative.io/edpresso/learning-about-defaultdict-in-python}.
+
+    \bibitem[A08]{A08} How to implement a graph in Python. Retrieved from \url{https://www.educative.io/edpresso/how-to-implement-a-graph-in-python}.
+  \end{thebibliography}
+\end{frame}
+
+\section{}
+% remover logo
+\setbeamertemplate{logo}{}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\end{document}
